@@ -11,20 +11,43 @@ if(wxWidgets_FOUND)
 endif()
 
 # Set compile flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
+if (MSVC)
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra -O2)
+endif()
 
 # Source files
 set(SOURCES
     src/main.cpp
 )
 
-# Create executable
-add_executable(${PROJECT_NAME} ${SOURCES})
+# Create executable - Use WIN32 flag for Windows GUI apps
+if(WIN32)
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCES})
+else()
+    add_executable(${PROJECT_NAME} ${SOURCES})
+endif()
 
-# ASana
+# Windows-specific settings
+if(WIN32)
+    # Ensure GUI subsystem is used
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        WIN32_EXECUTABLE TRUE
+    )
+    # Add wxWidgets definitions for Windows
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        wxUSE_GUI=1
+        __WXMSW__
+    )
+endif()
+
+# ASan (Note: fixed typo in comment)
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address -fno-omit-frame-pointer)
-    target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+    if(NOT WIN32)  # ASan typically not used with MSVC
+        target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+        target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
+    endif()
 endif()
 
 # Link libraries
