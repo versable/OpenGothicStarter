@@ -2,6 +2,7 @@
 #include <wx/bitmap.h>
 #include <wx/config.h>
 #include <wx/dir.h>
+#include <wx/fileconf.h>
 #include <wx/filename.h>
 #include <wx/filepicker.h>
 #include <wx/icon.h>
