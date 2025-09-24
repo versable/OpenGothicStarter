@@ -80,6 +80,7 @@ private:
   wxCheckBox *check_rti;
   wxCheckBox *check_meshlets;
   wxCheckBox *check_vsm;
+  wxCheckBox *check_bench;
   wxStaticText *field_fxaa;
   wxStaticText *value_fxaa;
   wxSlider *slide_fxaa;
@@ -128,6 +129,7 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
   EVT_CHECKBOX(2005, MainPanel::OnParams)
   EVT_CHECKBOX(2006, MainPanel::OnParams)
   EVT_CHECKBOX(2007, MainPanel::OnParams)
+  EVT_CHECKBOX(2008, MainPanel::OnParams)
   EVT_SCROLL(MainPanel::OnFXAAScroll)
 wxEND_EVENT_TABLE()
 
@@ -241,6 +243,7 @@ void MainPanel::InitWidgets() {
   check_rti = new wxCheckBox(this, 2005, wxT("Global illumination"));
   check_meshlets = new wxCheckBox(this, 2006, wxT("Meshlets"));
   check_vsm = new wxCheckBox(this, 2007, wxT("Virtual Shadowmap"));
+  check_bench = new wxCheckBox(this, 2008, wxT("Benchmark"));
 
   field_fxaa = new wxStaticText(this, wxID_ANY, wxT("FXAA:"));
   value_fxaa = new wxStaticText(this, wxID_ANY, wxT(""));
@@ -259,6 +262,7 @@ void MainPanel::InitWidgets() {
   side_sizer->Add(check_rti, 0, wxALL | wxEXPAND);
   side_sizer->Add(check_meshlets, 0, wxALL | wxEXPAND);
   side_sizer->Add(check_vsm, 0, wxALL | wxEXPAND);
+  side_sizer->Add(check_bench, 0, wxALL | wxEXPAND);
   side_sizer->AddSpacer(3);
   side_sizer->Add(fxaa_sizer, 0, wxALL | wxEXPAND);
   side_sizer->Add(slide_fxaa, 0, wxALL | wxEXPAND);
@@ -327,6 +331,10 @@ void MainPanel::LoadParams() {
   config->Read(wxT("PARAMS/vsm"), &vsm, false);
   check_vsm->SetValue(vsm);
 
+  bool bench;
+  config->Read(wxT("PARAMS/bench"), &bench, false);
+  check_bench->SetValue(bench);
+
   int fxaa;
   config->Read(wxT("PARAMS/FXAA"), &fxaa, 0L);
   slide_fxaa->SetValue(fxaa);
@@ -347,6 +355,7 @@ void MainPanel::SaveParams() {
   config->Write(wxT("PARAMS/illumination"), check_rti->GetValue());
   config->Write(wxT("PARAMS/meshlets"), check_meshlets->GetValue());
   config->Write(wxT("PARAMS/vsm"), check_vsm->GetValue());
+  config->Write(wxT("PARAMS/bench"), check_bench->GetValue());
   config->Write(wxT("PARAMS/FXAA"), (int)slide_fxaa->GetValue());
   config->Flush();
 }
@@ -433,6 +442,9 @@ void MainPanel::DoStart() {
   command.Add(check_meshlets->GetValue() ? wxT("1") : wxT("0"));
   command.Add(wxT("-vsm"));
   command.Add(check_vsm->GetValue() ? wxT("1") : wxT("0"));
+  if (check_bench->GetValue()) {
+    command.Add(wxT("-benchmark"));
+  }
 
   int fxaa = slide_fxaa->GetValue();
   if (fxaa > 0) {
