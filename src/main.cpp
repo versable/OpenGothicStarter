@@ -342,7 +342,7 @@ void MainPanel::LoadParams() {
   if (fxaa == 0) {
     value_fxaa->SetLabel(wxT("none"));
   } else {
-    value_fxaa->SetLabel(wxString::Format(wxT("%ld"), fxaa));
+    value_fxaa->SetLabel(wxString::Format(wxT("%d"), fxaa));
   }
 }
 
