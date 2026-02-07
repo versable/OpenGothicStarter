@@ -428,7 +428,7 @@ SettingsDialog::SettingsDialog(wxWindow *parent)
 
   wxBoxSizer *btn_sizer = new wxBoxSizer(wxHORIZONTAL);
   wxButton *button_cancel = new wxButton(panel, wxID_CANCEL, wxT("Cancel"));
-  wxButton *button_save = new wxButton(panel, wxID_OK, wxT("✓ Apply"));
+  wxButton *button_save = new wxButton(panel, wxID_OK, wxT("Apply"));
 
   btn_sizer->AddStretchSpacer();
   btn_sizer->Add(button_cancel);
