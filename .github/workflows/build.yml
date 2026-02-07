@@ -74,9 +74,9 @@ jobs:
         path: |
           C:\vcpkg\installed
           C:\vcpkg\packages
-        key: ${{ runner.os }}-vcpkg-x64-windows-static-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
-          ${{ runner.os }}-vcpkg-x64-windows-static-
+          ${{ runner.os }}-vcpkg-
 
     - name: Setup vcpkg
       shell: pwsh
@@ -90,12 +90,12 @@ jobs:
     - name: Install dependencies
       shell: pwsh
       run: |
-        & "$env:VCPKG_ROOT\vcpkg.exe" install --triplet x64-windows-static
+        & "$env:VCPKG_ROOT\vcpkg.exe" install --triplet x64-windows
 
     - name: Configure
       shell: pwsh
       run: |
-        cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+        cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake"
 
     - name: Build
       shell: pwsh
