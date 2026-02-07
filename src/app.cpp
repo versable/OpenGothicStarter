@@ -63,6 +63,73 @@ static T *RequireInvariant(T *ptr, const wxString &message) {
   return ptr;
 }
 
+static bool ResolveLaunchPaths(wxString &openGothicPath, wxString &gothicPath,
+                               wxString &error) {
+  error.clear();
+  openGothicPath.clear();
+  gothicPath.clear();
+
+  OpenGothicStarterApp *app = RequireInvariant(
+      dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
+      wxT("wxTheApp must be an OpenGothicStarterApp instance."));
+
+  if (app->runtime_paths_resolved) {
+    wxString runtimeError;
+    if (ValidateRuntimePaths(app->runtime_paths, runtimeError)) {
+      openGothicPath = app->runtime_paths.open_gothic_executable;
+      gothicPath = app->runtime_paths.gothic_root;
+      return true;
+    }
+
+    wxLogWarning(wxT("Runtime paths invalid, falling back to configured paths: %s"),
+                 runtimeError);
+  }
+
+  auto *config = wxConfigBase::Get();
+  config->Read(wxT("GENERAL/openGothicPath"), &openGothicPath, wxT(""));
+  config->Read(wxT("GENERAL/gothicPath"), &gothicPath, wxT(""));
+
+  if (openGothicPath.empty() || gothicPath.empty()) {
+    error = wxT("Could not resolve paths from runtime location or configured settings.");
+    return false;
+  }
+  if (!wxFileName::FileExists(openGothicPath)) {
+    error = wxString::Format(wxT("OpenGothic executable does not exist: %s"),
+                             openGothicPath);
+    return false;
+  }
+  if (!wxDir::Exists(gothicPath)) {
+    error = wxString::Format(wxT("Gothic directory does not exist: %s"), gothicPath);
+    return false;
+  }
+
+  return true;
+}
+
+static bool ResolveGothicRootForDiscovery(wxString &gothicRoot) {
+  gothicRoot.clear();
+
+  OpenGothicStarterApp *app = RequireInvariant(
+      dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
+      wxT("wxTheApp must be an OpenGothicStarterApp instance."));
+
+  if (app->runtime_paths_resolved) {
+    wxString runtimeError;
+    if (ValidateRuntimePaths(app->runtime_paths, runtimeError)) {
+      gothicRoot = app->runtime_paths.gothic_root;
+      return true;
+    }
+  }
+
+  auto *config = wxConfigBase::Get();
+  config->Read(wxT("GENERAL/gothicPath"), &gothicRoot, wxT(""));
+  if (gothicRoot.empty()) {
+    return false;
+  }
+
+  return wxDir::Exists(gothicRoot);
+}
+
 // clang-format off
 wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
     EVT_BUTTON(wxID_CANCEL, SettingsDialog::OnCancel)
@@ -384,24 +451,10 @@ void MainPanel::DoStart() {
   auto *config = wxConfigBase::Get();
 
   wxString openGothicPath;
-  config->Read(wxT("GENERAL/openGothicPath"), &openGothicPath, wxT(""));
-
   wxString gothicPath;
-  config->Read(wxT("GENERAL/gothicPath"), &gothicPath, wxT(""));
-
-  if (openGothicPath.IsEmpty() || gothicPath.IsEmpty()) {
-    wxMessageBox(wxT("Please configure paths in Settings first."),
-                 wxT("Configuration Required"), wxOK | wxICON_WARNING);
-    return;
-  }
-  if (!wxFileName::FileExists(openGothicPath)) {
-    wxMessageBox(wxT("Configured OpenGothic executable does not exist."),
-                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
-    return;
-  }
-  if (!wxDir::Exists(gothicPath)) {
-    wxMessageBox(wxT("Configured Gothic directory does not exist."),
-                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
+  wxString pathError;
+  if (!ResolveLaunchPaths(openGothicPath, gothicPath, pathError)) {
+    wxMessageBox(pathError, wxT("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
 
@@ -490,12 +543,11 @@ void MainPanel::DoStart() {
 
 std::vector<GameEntry> MainPanel::InitGames() {
   std::vector<GameEntry> gamesList;
-  auto *config = wxConfigBase::Get();
 
   wxString gothicRoot;
-  config->Read("GENERAL/gothicPath", &gothicRoot, "");
-  if (gothicRoot.IsEmpty())
+  if (!ResolveGothicRootForDiscovery(gothicRoot)) {
     return gamesList;
+  }
 
   wxString systemDir = wxFileName(gothicRoot, "system").GetFullPath();
   if (!wxDir::Exists(systemDir))
