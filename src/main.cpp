@@ -1,3 +1,4 @@
+#include <string>
 #include <vector>
 #include <wx/bitmap.h>
 #include <wx/config.h>
@@ -22,6 +23,31 @@ const wxChar *versions[] = {wxT("Gothic 1"), wxT("Gothic 2 Classic"),
                             wxT("Gothic 2 Night of the Raven")};
 
 const wxArrayString APP_GAME_VERSIONS(WXSIZEOF(versions), versions);
+
+static long ExecuteAsyncCommand(const wxArrayString &command,
+                                const wxExecuteEnv &env) {
+  std::vector<std::string> argvStorage;
+  argvStorage.reserve(command.GetCount());
+
+  for (const wxString &arg : command) {
+    wxCharBuffer utf8 = arg.utf8_str();
+    if (!utf8) {
+      wxLogError(wxT("Failed to encode command argument for process launch."));
+      return 0;
+    }
+
+    argvStorage.emplace_back(utf8.data());
+  }
+
+  std::vector<const char *> argv;
+  argv.reserve(argvStorage.size() + 1);
+  for (const std::string &arg : argvStorage) {
+    argv.push_back(arg.c_str());
+  }
+  argv.push_back(nullptr);
+
+  return wxExecute(argv.data(), wxEXEC_ASYNC, nullptr, &env);
+}
 
 struct GameEntry {
   wxString file;
@@ -463,10 +489,16 @@ void MainPanel::DoStart() {
     env.cwd = wxFileName(env.cwd, wxT("default")).GetFullPath();
   }
 
-  wxLogMessage(wxT("Starting game with command: %s"), wxJoin(command, ' '));
+  wxLogMessage(wxT("Starting game with %zu arguments."),
+               static_cast<size_t>(command.GetCount()));
   wxLogMessage(wxT("Working directory: %s"), env.cwd);
 
-  wxExecute(wxJoin(command, ' '), wxEXEC_ASYNC, nullptr, &env);
+  const long pid = ExecuteAsyncCommand(command, env);
+  if (pid == 0) {
+    wxMessageBox(wxT("Failed to start OpenGothic process."),
+                 wxT("Launch Failed"), wxOK | wxICON_ERROR);
+    return;
+  }
 }
 
 std::vector<GameEntry> MainPanel::InitGames() {
