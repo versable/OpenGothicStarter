@@ -433,6 +433,16 @@ void MainPanel::DoStart() {
                  wxT("Configuration Required"), wxOK | wxICON_WARNING);
     return;
   }
+  if (!wxFileName::FileExists(openGothicPath)) {
+    wxMessageBox(wxT("Configured OpenGothic executable does not exist."),
+                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
+  }
+  if (!wxDir::Exists(gothicPath)) {
+    wxMessageBox(wxT("Configured Gothic directory does not exist."),
+                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
+  }
 
   wxArrayString command;
   command.Add(openGothicPath);
@@ -442,12 +452,20 @@ void MainPanel::DoStart() {
   int version;
   config->Read(wxT("GENERAL/gothicVersion"), &version, 2L);
 
-  if (version == 0) {
+  switch (version) {
+  case 0:
     command.Add(wxT("-g1"));
-  } else if (version == 1) {
+    break;
+  case 1:
     command.Add(wxT("-g2c"));
-  } else if (version == 2) {
+    break;
+  case 2:
     command.Add(wxT("-g2"));
+    break;
+  default:
+    wxMessageBox(wxT("Configured game version is invalid. Please re-select it in Settings."),
+                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
   }
 
   int gameidx = list_ctrl->GetFirstSelected();
