@@ -522,11 +522,15 @@ void MainPanel::DoStart() {
   if (gameidx >= 0 && gameidx < (int)games.size()) {
     env.cwd = games[gameidx].datadir;
   } else {
-    OpenGothicStarterApp *app = RequireInvariant(
-        dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
-        wxT("wxTheApp must be an OpenGothicStarterApp instance."));
-    env.cwd = wxFileName(app->config_path, wxT("data")).GetFullPath();
-    env.cwd = wxFileName(env.cwd, wxT("default")).GetFullPath();
+    env.cwd = wxFileName(gothicPath, wxT("Saves")).GetFullPath();
+  }
+
+  if (!wxDir::Exists(env.cwd) &&
+      !wxFileName::Mkdir(env.cwd, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
+    wxMessageBox(wxString::Format(wxT("Failed to create working directory: %s"),
+                                  env.cwd),
+                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
   }
 
   wxLogMessage(wxT("Starting game with %zu arguments."),
@@ -593,11 +597,7 @@ std::vector<GameEntry> MainPanel::InitGames() {
         entry.icon.Clear();
       }
 
-      OpenGothicStarterApp *app = RequireInvariant(
-          dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
-          wxT("wxTheApp must be an OpenGothicStarterApp instance."));
-
-      wxString dataRoot = wxFileName(app->config_path, "data").GetFullPath();
+      wxString dataRoot = wxFileName(gothicRoot, wxT("Saves")).GetFullPath();
       wxString modName = wxFileName(iniName).GetName();
       entry.datadir = wxFileName(dataRoot, modName).GetFullPath();
 
