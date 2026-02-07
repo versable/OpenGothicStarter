@@ -134,7 +134,7 @@ public:
   wxString config_path;
 
 private:
-  void InitConfig();
+  bool InitConfig();
 };
 
 // clang-format off
@@ -573,8 +573,11 @@ std::vector<GameEntry> MainPanel::InitGames() {
       wxString modName = wxFileName(iniName).GetName();
       entry.datadir = wxFileName(dataRoot, modName).GetFullPath();
 
-      if (!wxDir::Exists(entry.datadir)) {
-        wxFileName::Mkdir(entry.datadir, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+      if (!wxDir::Exists(entry.datadir) &&
+          !wxFileName::Mkdir(entry.datadir, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
+        wxLogError(wxT("Failed to create mod data directory: %s"), entry.datadir);
+        hasFile = dir.GetNext(&iniName);
+        continue;
       }
 
       gamesList.push_back(std::move(entry));
@@ -606,7 +609,9 @@ void MainFrame::OnSettings(wxCommandEvent &) {
 }
 
 bool OpenGothicStarterApp::OnInit() {
-  InitConfig();
+  if (!InitConfig()) {
+    return false;
+  }
 
   wxLog::SetActiveTarget(new wxLogStderr());
 
@@ -614,25 +619,30 @@ bool OpenGothicStarterApp::OnInit() {
   return true;
 }
 
-void OpenGothicStarterApp::InitConfig() {
+bool OpenGothicStarterApp::InitConfig() {
   wxStandardPaths::Get().SetFileLayout(wxStandardPaths::FileLayout_XDG);
   wxStandardPaths &path = wxStandardPaths::Get();
   config_path = wxFileName(path.GetUserConfigDir(), APP_NAME).GetFullPath();
 
-  if (!wxDir::Exists(config_path)) {
-    wxFileName::Mkdir(config_path, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+  if (!wxDir::Exists(config_path) &&
+      !wxFileName::Mkdir(config_path, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
+    wxLogError(wxT("Failed to create config directory: %s"), config_path);
+    return false;
   }
 
   wxString defaultDataPath = wxFileName(config_path, wxT("data")).GetFullPath();
   wxString defaultDir =
       wxFileName(defaultDataPath, wxT("default")).GetFullPath();
-  if (!wxDir::Exists(defaultDir)) {
-    wxFileName::Mkdir(defaultDir, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
+  if (!wxDir::Exists(defaultDir) &&
+      !wxFileName::Mkdir(defaultDir, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
+    wxLogError(wxT("Failed to create default data directory: %s"), defaultDir);
+    return false;
   }
 
   wxString configFile =
       wxFileName(config_path, APP_NAME.Lower() + wxT(".ini")).GetFullPath();
   wxFileConfig::Set(new wxFileConfig(APP_NAME, wxEmptyString, configFile));
+  return true;
 }
 
 wxIMPLEMENT_APP(OpenGothicStarterApp);
