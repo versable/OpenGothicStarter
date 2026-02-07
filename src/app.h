@@ -73,7 +73,9 @@ public:
 
   RuntimePaths runtime_paths;
   bool runtime_paths_resolved = false;
+  int gothic_version = -1;
 
 private:
   bool InitConfig();
+  bool InitGothicVersion();
 };
