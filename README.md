@@ -25,7 +25,7 @@ engine reimplementation.
 - Original Gothic game files
 - CMake 3.16 or higher
 - C++17 compatible compiler
-. wxWidgets
+- wxWidgets
 
 ### Debian based systems
 
@@ -52,6 +52,26 @@ cd OpenGothicStarter
 cmake --build .
 cmake -DCMAKE_BUILD_TYPE=Debug -B build
 make -C build
+```
+
+## Development
+
+### Formatting
+
+This repository uses `clang-format` with the checked-in `.clang-format`.
+
+Format all C/C++ sources:
+
+```bash
+./scripts/format.sh
+```
+
+### Pre-commit Hook
+
+Enable the repository hook that formats staged C/C++ files before commit:
+
+```bash
+git config core.hooksPath .githooks
 ```
 
 ## Setup

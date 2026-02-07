@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mapfile -t files < <(
+  git diff --cached --name-only --diff-filter=ACMR |
+    grep -E '\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$' || true
+)
+
+if [ "${#files[@]}" -eq 0 ]; then
+  exit 0
+fi
+
+./scripts/format.sh "${files[@]}"
+git add "${files[@]}"
+
+echo "Formatted staged C/C++ files with clang-format."

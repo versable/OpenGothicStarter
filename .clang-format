@@ -1,0 +1,18 @@
+BasedOnStyle: LLVM
+IndentWidth: 2
+ContinuationIndentWidth: 4
+ColumnLimit: 0
+PointerAlignment: Right
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: All
+SortIncludes: true
+StatementMacros:
+  - wxBEGIN_EVENT_TABLE
+  - wxEND_EVENT_TABLE
+  - EVT_BUTTON
+  - EVT_SIZE
+  - EVT_LIST_ITEM_SELECTED
+  - EVT_LIST_ITEM_DESELECTED
+  - EVT_LIST_ITEM_ACTIVATED
+  - EVT_CHECKBOX
+  - EVT_SCROLL

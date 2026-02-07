@@ -10,7 +10,24 @@ on:
   workflow_dispatch:
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install clang-format
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format
+
+    - name: Run formatter
+      run: ./scripts/format.sh
+
+    - name: Verify formatting
+      run: git diff --exit-code
+
   build:
+    needs: format
     strategy:
       fail-fast: false
       matrix:

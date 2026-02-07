@@ -111,6 +111,7 @@ private:
   void InitConfig();
 };
 
+// clang-format off
 wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
     EVT_BUTTON(wxID_CANCEL, SettingsDialog::OnCancel)
     EVT_BUTTON(wxID_OK, SettingsDialog::OnSave)
@@ -136,6 +137,7 @@ wxEND_EVENT_TABLE()
 wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_BUTTON(1002, MainFrame::OnSettings)
 wxEND_EVENT_TABLE()
+// clang-format on
 
 SettingsDialog::SettingsDialog(wxWindow *parent)
     : wxDialog(parent, wxID_ANY, wxT("Settings"), wxDefaultPosition,
