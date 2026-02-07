@@ -1,3 +1,5 @@
+#include <cassert>
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include <wx/bitmap.h>
@@ -47,6 +49,16 @@ static long ExecuteAsyncCommand(const wxArrayString &command,
   argv.push_back(nullptr);
 
   return wxExecute(argv.data(), wxEXEC_ASYNC, nullptr, &env);
+}
+
+template <typename T>
+static T *RequireInvariant(T *ptr, const wxString &message) {
+  assert(ptr != nullptr);
+  if (!ptr) {
+    wxLogError(wxT("Invariant violation: %s"), message);
+    std::abort();
+  }
+  return ptr;
 }
 
 struct GameEntry {
@@ -220,9 +232,14 @@ void SettingsDialog::OnSave(wxCommandEvent &) {
                 (int)gameversion->GetSelection());
   config->Flush();
 
-  MainFrame *mainFrame = static_cast<MainFrame *>(GetParent());
-  mainFrame->panel->Populate();
-  mainFrame->panel->DoOrigin();
+  MainFrame *mainFrame =
+      RequireInvariant(dynamic_cast<MainFrame *>(GetParent()),
+                       wxT("SettingsDialog parent must be MainFrame."));
+  MainPanel *mainPanel =
+      RequireInvariant(mainFrame->panel,
+                       wxT("MainFrame must always own a MainPanel instance."));
+  mainPanel->Populate();
+  mainPanel->DoOrigin();
 
   EndModal(wxID_OK);
 }
@@ -502,7 +519,9 @@ void MainPanel::DoStart() {
   if (gameidx >= 0 && gameidx < (int)games.size()) {
     env.cwd = games[gameidx].datadir;
   } else {
-    OpenGothicStarterApp *app = static_cast<OpenGothicStarterApp *>(wxTheApp);
+    OpenGothicStarterApp *app = RequireInvariant(
+        dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
+        wxT("wxTheApp must be an OpenGothicStarterApp instance."));
     env.cwd = wxFileName(app->config_path, wxT("data")).GetFullPath();
     env.cwd = wxFileName(env.cwd, wxT("default")).GetFullPath();
   }
@@ -567,7 +586,9 @@ std::vector<GameEntry> MainPanel::InitGames() {
         entry.icon.Clear();
       }
 
-      OpenGothicStarterApp *app = static_cast<OpenGothicStarterApp *>(wxTheApp);
+      OpenGothicStarterApp *app = RequireInvariant(
+          dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
+          wxT("wxTheApp must be an OpenGothicStarterApp instance."));
 
       wxString dataRoot = wxFileName(app->config_path, "data").GetFullPath();
       wxString modName = wxFileName(iniName).GetName();
