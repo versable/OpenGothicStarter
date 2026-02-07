@@ -8,7 +8,6 @@
 
 extern const wxString APP_NAME;
 extern const wxString APP_VERSION;
-extern const wxArrayString APP_GAME_VERSIONS;
 
 struct GameEntry {
   wxString file;

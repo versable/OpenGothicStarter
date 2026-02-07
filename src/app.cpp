@@ -22,11 +22,6 @@
 const wxString APP_NAME = wxT("OpenGothicStarter");
 const wxString APP_VERSION = wxT("0.0.1");
 
-const wxChar *versions[] = {wxT("Gothic 1"), wxT("Gothic 2 Classic"),
-                            wxT("Gothic 2 Night of the Raven")};
-
-const wxArrayString APP_GAME_VERSIONS(WXSIZEOF(versions), versions);
-
 static long ExecuteAsyncCommand(const wxArrayString &command,
                                 const wxExecuteEnv &env) {
   std::vector<std::string> argvStorage;
