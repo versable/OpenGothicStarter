@@ -546,23 +546,43 @@ bool OpenGothicStarterApp::OnInit() {
   RuntimePaths detectedPaths;
   if (!ResolveRuntimePaths(detectedPaths, resolveError)) {
     wxLogWarning(wxT("Runtime path resolution failed: %s"), resolveError);
-  } else {
-    runtime_paths = detectedPaths;
-    runtime_paths_resolved = true;
+    wxMessageBox(wxString::Format(
+                     wxT("OpenGothicStarter must be started from your Gothic "
+                         "'system' directory.\n\n"
+                         "Current location:\n%s\n\n"
+                         "Expected layout:\n"
+                         "<Gothic>/system/OpenGothicStarter\n"
+                         "<Gothic>/system/Gothic2Notr (or OpenGothic)"),
+                     wxStandardPaths::Get().GetExecutablePath()),
+                 wxT("Invalid Launcher Location"), wxOK | wxICON_ERROR);
+    return false;
+  }
 
-    wxString validationError;
-    if (!ValidateRuntimePaths(runtime_paths, validationError)) {
-      wxLogWarning(wxT("Runtime path validation failed: %s"), validationError);
-    }
+  runtime_paths = detectedPaths;
+  runtime_paths_resolved = true;
 
-    wxLogMessage(wxT("Launcher executable: %s"), runtime_paths.launcher_executable);
-    wxLogMessage(wxT("Detected Gothic root: %s"), runtime_paths.gothic_root);
-    wxLogMessage(wxT("Detected system directory: %s"), runtime_paths.system_dir);
-    wxLogMessage(wxT("Detected saves directory: %s"), runtime_paths.saves_dir);
-    if (!runtime_paths.open_gothic_executable.empty()) {
-      wxLogMessage(wxT("Detected OpenGothic executable: %s"),
-                   runtime_paths.open_gothic_executable);
-    }
+  wxString validationError;
+  if (!ValidateRuntimePaths(runtime_paths, validationError)) {
+    wxLogWarning(wxT("Runtime path validation failed: %s"), validationError);
+    wxMessageBox(wxString::Format(
+                     wxT("OpenGothic executable was not found in the Gothic "
+                         "'system' directory.\n\n"
+                         "Checked directory:\n%s\n\n"
+                         "Expected executable names:\n"
+                         "- Gothic2Notr\n"
+                         "- OpenGothic"),
+                     runtime_paths.system_dir),
+                 wxT("OpenGothic Not Found"), wxOK | wxICON_ERROR);
+    return false;
+  }
+
+  wxLogMessage(wxT("Launcher executable: %s"), runtime_paths.launcher_executable);
+  wxLogMessage(wxT("Detected Gothic root: %s"), runtime_paths.gothic_root);
+  wxLogMessage(wxT("Detected system directory: %s"), runtime_paths.system_dir);
+  wxLogMessage(wxT("Detected saves directory: %s"), runtime_paths.saves_dir);
+  if (!runtime_paths.open_gothic_executable.empty()) {
+    wxLogMessage(wxT("Detected OpenGothic executable: %s"),
+                 runtime_paths.open_gothic_executable);
   }
 
   new MainFrame();
