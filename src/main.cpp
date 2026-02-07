@@ -339,6 +339,9 @@ private:
   wxCheckBox *check_meshlets;
   wxCheckBox *check_vsm;
   wxCheckBox *check_bench;
+#if defined(_WIN32)
+  wxCheckBox *check_dx12;
+#endif
   wxStaticText *field_fxaa;
   wxStaticText *value_fxaa;
   wxSlider *slide_fxaa;
@@ -389,6 +392,9 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
   EVT_CHECKBOX(2006, MainPanel::OnParams)
   EVT_CHECKBOX(2007, MainPanel::OnParams)
   EVT_CHECKBOX(2008, MainPanel::OnParams)
+#if defined(_WIN32)
+  EVT_CHECKBOX(2009, MainPanel::OnParams)
+#endif
   EVT_SCROLL(MainPanel::OnFXAAScroll)
 wxEND_EVENT_TABLE()
 
@@ -504,6 +510,9 @@ void MainPanel::InitWidgets() {
   check_orig = new wxCheckBox(this, 2001, wxT("Start game without mods"));
   check_window = new wxCheckBox(this, 2002, wxT("Window mode"));
   check_marvin = new wxCheckBox(this, 2003, wxT("Marvin mode"));
+#if defined(_WIN32)
+  check_dx12 = new wxCheckBox(this, 2009, wxT("Force DirectX 12"));
+#endif
   check_rt = new wxCheckBox(this, 2004, wxT("Ray tracing"));
   check_rti = new wxCheckBox(this, 2005, wxT("Global illumination"));
   check_meshlets = new wxCheckBox(this, 2006, wxT("Meshlets"));
@@ -523,6 +532,9 @@ void MainPanel::InitWidgets() {
   side_sizer->Add(check_orig, 0, wxALL | wxEXPAND);
   side_sizer->Add(check_window, 0, wxALL | wxEXPAND);
   side_sizer->Add(check_marvin, 0, wxALL | wxEXPAND);
+#if defined(_WIN32)
+  side_sizer->Add(check_dx12, 0, wxALL | wxEXPAND);
+#endif
   side_sizer->Add(check_rt, 0, wxALL | wxEXPAND);
   side_sizer->Add(check_rti, 0, wxALL | wxEXPAND);
   side_sizer->Add(check_meshlets, 0, wxALL | wxEXPAND);
@@ -612,6 +624,12 @@ void MainPanel::LoadParams() {
   config->Read(wxT("PARAMS/bench"), &bench, false);
   check_bench->SetValue(bench);
 
+#if defined(_WIN32)
+  bool dx12;
+  config->Read(wxT("PARAMS/dx12"), &dx12, false);
+  check_dx12->SetValue(dx12);
+#endif
+
   int fxaa;
   config->Read(wxT("PARAMS/FXAA"), &fxaa, 0L);
   slide_fxaa->SetValue(fxaa);
@@ -633,6 +651,9 @@ void MainPanel::SaveParams() {
   config->Write(wxT("PARAMS/meshlets"), check_meshlets->GetValue());
   config->Write(wxT("PARAMS/vsm"), check_vsm->GetValue());
   config->Write(wxT("PARAMS/bench"), check_bench->GetValue());
+#if defined(_WIN32)
+  config->Write(wxT("PARAMS/dx12"), check_dx12->GetValue());
+#endif
   config->Write(wxT("PARAMS/FXAA"), (int)slide_fxaa->GetValue());
   config->Flush();
 }
@@ -740,6 +761,12 @@ void MainPanel::DoStart() {
   if (check_bench->GetValue()) {
     command.Add(wxT("-benchmark"));
   }
+
+#if defined(_WIN32)
+  if (check_dx12->GetValue()) {
+    command.Add(wxT("-dx12"));
+  }
+#endif
 
   int fxaa = slide_fxaa->GetValue();
   if (fxaa > 0) {
