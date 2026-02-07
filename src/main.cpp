@@ -245,9 +245,9 @@ void MainPanel::InitWidgets() {
   check_vsm = new wxCheckBox(this, 2007, wxT("Virtual Shadowmap"));
   check_bench = new wxCheckBox(this, 2008, wxT("Benchmark"));
 
-  field_fxaa = new wxStaticText(this, wxID_ANY, wxT("FXAA:"));
+  field_fxaa = new wxStaticText(this, wxID_ANY, wxT("Anti-Aliasing:"));
   value_fxaa = new wxStaticText(this, wxID_ANY, wxT(""));
-  slide_fxaa = new wxSlider(this, wxID_ANY, 0, 0, 5);
+  slide_fxaa = new wxSlider(this, wxID_ANY, 0, 0, 2);
 
   wxBoxSizer *fxaa_sizer = new wxBoxSizer(wxHORIZONTAL);
   fxaa_sizer->Add(field_fxaa);
