@@ -72,35 +72,33 @@ static bool ResolveLaunchPaths(wxString &openGothicPath, wxString &gothicPath,
       dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
       wxT("wxTheApp must be an OpenGothicStarterApp instance."));
 
-  if (app->runtime_paths_resolved) {
-    wxString runtimeError;
-    if (ValidateRuntimePaths(app->runtime_paths, runtimeError)) {
-      openGothicPath = app->runtime_paths.open_gothic_executable;
-      gothicPath = app->runtime_paths.gothic_root;
-      return true;
+  if (!app->runtime_paths_resolved) {
+    RuntimePaths detectedPaths;
+    wxString resolveError;
+    if (!ResolveRuntimePaths(detectedPaths, resolveError)) {
+      error = wxString::Format(
+          wxT("Could not derive runtime paths from launcher location.\n"
+              "Place OpenGothicStarter inside Gothic/system.\n"
+              "Details: %s"),
+          resolveError);
+      return false;
     }
-
-    wxLogWarning(wxT("Runtime paths invalid, falling back to configured paths: %s"),
-                 runtimeError);
+    app->runtime_paths = detectedPaths;
+    app->runtime_paths_resolved = true;
   }
 
-  auto *config = wxConfigBase::Get();
-  config->Read(wxT("GENERAL/openGothicPath"), &openGothicPath, wxT(""));
-  config->Read(wxT("GENERAL/gothicPath"), &gothicPath, wxT(""));
+  wxString runtimeError;
+  if (!ValidateRuntimePaths(app->runtime_paths, runtimeError)) {
+    error = wxString::Format(
+        wxT("Invalid runtime layout.\n"
+            "Expected launcher in Gothic/system and OpenGothic executable in system.\n"
+            "Details: %s"),
+        runtimeError);
+    return false;
+  }
 
-  if (openGothicPath.empty() || gothicPath.empty()) {
-    error = wxT("Could not resolve paths from runtime location or configured settings.");
-    return false;
-  }
-  if (!wxFileName::FileExists(openGothicPath)) {
-    error = wxString::Format(wxT("OpenGothic executable does not exist: %s"),
-                             openGothicPath);
-    return false;
-  }
-  if (!wxDir::Exists(gothicPath)) {
-    error = wxString::Format(wxT("Gothic directory does not exist: %s"), gothicPath);
-    return false;
-  }
+  openGothicPath = app->runtime_paths.open_gothic_executable;
+  gothicPath = app->runtime_paths.gothic_root;
 
   return true;
 }
@@ -112,21 +110,23 @@ static bool ResolveGothicRootForDiscovery(wxString &gothicRoot) {
       dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
       wxT("wxTheApp must be an OpenGothicStarterApp instance."));
 
-  if (app->runtime_paths_resolved) {
-    wxString runtimeError;
-    if (ValidateRuntimePaths(app->runtime_paths, runtimeError)) {
-      gothicRoot = app->runtime_paths.gothic_root;
-      return true;
+  if (!app->runtime_paths_resolved) {
+    RuntimePaths detectedPaths;
+    wxString resolveError;
+    if (!ResolveRuntimePaths(detectedPaths, resolveError)) {
+      return false;
     }
+    app->runtime_paths = detectedPaths;
+    app->runtime_paths_resolved = true;
   }
 
-  auto *config = wxConfigBase::Get();
-  config->Read(wxT("GENERAL/gothicPath"), &gothicRoot, wxT(""));
-  if (gothicRoot.empty()) {
+  wxString runtimeError;
+  if (!ValidateRuntimePaths(app->runtime_paths, runtimeError)) {
     return false;
   }
 
-  return wxDir::Exists(gothicRoot);
+  gothicRoot = app->runtime_paths.gothic_root;
+  return true;
 }
 
 // clang-format off
@@ -577,25 +577,17 @@ bool OpenGothicStarterApp::OnInit() {
 bool OpenGothicStarterApp::InitConfig() {
   wxStandardPaths::Get().SetFileLayout(wxStandardPaths::FileLayout_XDG);
   wxStandardPaths &path = wxStandardPaths::Get();
-  config_path = wxFileName(path.GetUserConfigDir(), APP_NAME).GetFullPath();
+  const wxString configPath =
+      wxFileName(path.GetUserConfigDir(), APP_NAME).GetFullPath();
 
-  if (!wxDir::Exists(config_path) &&
-      !wxFileName::Mkdir(config_path, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
-    wxLogError(wxT("Failed to create config directory: %s"), config_path);
-    return false;
-  }
-
-  wxString defaultDataPath = wxFileName(config_path, wxT("data")).GetFullPath();
-  wxString defaultDir =
-      wxFileName(defaultDataPath, wxT("default")).GetFullPath();
-  if (!wxDir::Exists(defaultDir) &&
-      !wxFileName::Mkdir(defaultDir, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
-    wxLogError(wxT("Failed to create default data directory: %s"), defaultDir);
+  if (!wxDir::Exists(configPath) &&
+      !wxFileName::Mkdir(configPath, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
+    wxLogError(wxT("Failed to create config directory: %s"), configPath);
     return false;
   }
 
   wxString configFile =
-      wxFileName(config_path, APP_NAME.Lower() + wxT(".ini")).GetFullPath();
+      wxFileName(configPath, APP_NAME.Lower() + wxT(".ini")).GetFullPath();
   wxFileConfig::Set(new wxFileConfig(APP_NAME, wxEmptyString, configFile));
   return true;
 }

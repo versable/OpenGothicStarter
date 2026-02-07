@@ -72,7 +72,6 @@ class OpenGothicStarterApp : public wxApp {
 public:
   bool OnInit() override;
 
-  wxString config_path;
   RuntimePaths runtime_paths;
   bool runtime_paths_resolved = false;
 
