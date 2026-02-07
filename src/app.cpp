@@ -48,6 +48,31 @@ static long ExecuteAsyncCommand(const wxArrayString &command,
   return wxExecute(argv.data(), wxEXEC_ASYNC, nullptr, &env);
 }
 
+static wxString EscapeAndQuoteForLog(const wxString &arg) {
+  wxString escaped;
+  escaped.reserve(arg.length() + 2);
+
+  for (wxUniChar ch : arg) {
+    if (ch == wxT('\\') || ch == wxT('"')) {
+      escaped += wxT('\\');
+    }
+    escaped += ch;
+  }
+
+  return wxString::Format(wxT("\"%s\""), escaped);
+}
+
+static wxString BuildCommandLogLine(const wxArrayString &command) {
+  wxString rendered;
+  for (size_t i = 0; i < command.GetCount(); ++i) {
+    if (i > 0) {
+      rendered += wxT(" ");
+    }
+    rendered += EscapeAndQuoteForLog(command[i]);
+  }
+  return rendered;
+}
+
 template <typename T>
 static T *RequireInvariant(T *ptr, const wxString &message) {
   assert(ptr != nullptr);
@@ -533,8 +558,7 @@ void MainPanel::DoStart() {
     return;
   }
 
-  wxLogMessage(wxT("Starting game with %zu arguments."),
-               static_cast<size_t>(command.GetCount()));
+  wxLogMessage(wxT("Starting game command: %s"), BuildCommandLogLine(command));
   wxLogMessage(wxT("Working directory: %s"), env.cwd);
 
   const long pid = ExecuteAsyncCommand(command, env);
