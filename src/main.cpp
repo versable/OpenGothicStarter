@@ -11,7 +11,6 @@
 #include <wx/filename.h>
 #include <wx/filepicker.h>
 #include <wx/icon.h>
-#include <wx/imagbmp.h>
 #include <wx/imaglist.h>
 #include <wx/listctrl.h>
 #include <wx/log.h>
@@ -59,6 +58,10 @@ static long ExecuteAsyncCommand(const wxArrayString &command,
   return wxExecute(argv.data(), wxEXEC_ASYNC, nullptr, &env);
 }
 
+static bool HasIcoImageHandler() {
+  return wxImage::FindHandler(wxBITMAP_TYPE_ICO) != nullptr;
+}
+
 template <typename T>
 static T *RequireInvariant(T *ptr, const wxString &message) {
   assert(ptr != nullptr);
@@ -70,10 +73,6 @@ static T *RequireInvariant(T *ptr, const wxString &message) {
 }
 
 #if defined(OGS_HAVE_PE_PARSE) && !defined(_WIN32)
-static bool HasIcoImageHandler() {
-  return wxImage::FindHandler(wxBITMAP_TYPE_ICO) != nullptr;
-}
-
 static bool ReadLe16(const std::vector<uint8_t> &data, size_t offset,
                      uint16_t &value) {
   if (offset + 2 > data.size()) {
@@ -872,9 +871,7 @@ bool OpenGothicStarterApp::OnInit() {
     return false;
   }
 
-  if (wxUSE_ICO_CUR && wxImage::FindHandler(wxBITMAP_TYPE_ICO) == nullptr) {
-    wxImage::AddHandler(new wxICOHandler());
-  }
+  wxInitAllImageHandlers();
   wxLog::SetActiveTarget(new wxLogStderr());
 
   new MainFrame();
