@@ -83,70 +83,20 @@ static T *RequireInvariant(T *ptr, const wxString &message) {
   return ptr;
 }
 
-static bool ResolveLaunchPaths(wxString &openGothicPath, wxString &gothicPath,
-                               wxString &error) {
+static bool GetResolvedRuntimePaths(const RuntimePaths *&paths, wxString &error) {
   error.clear();
-  openGothicPath.clear();
-  gothicPath.clear();
+  paths = nullptr;
 
   OpenGothicStarterApp *app = RequireInvariant(
       dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
       wxT("wxTheApp must be an OpenGothicStarterApp instance."));
 
   if (!app->runtime_paths_resolved) {
-    RuntimePaths detectedPaths;
-    wxString resolveError;
-    if (!ResolveRuntimePaths(detectedPaths, resolveError)) {
-      error = wxString::Format(
-          wxT("Could not derive runtime paths from launcher location.\n"
-              "Place OpenGothicStarter inside Gothic/system.\n"
-              "Details: %s"),
-          resolveError);
-      return false;
-    }
-    app->runtime_paths = detectedPaths;
-    app->runtime_paths_resolved = true;
-  }
-
-  wxString runtimeError;
-  if (!ValidateRuntimePaths(app->runtime_paths, runtimeError)) {
-    error = wxString::Format(
-        wxT("Invalid runtime layout.\n"
-            "Expected launcher in Gothic/system and OpenGothic executable in system.\n"
-            "Details: %s"),
-        runtimeError);
+    error = wxT("Runtime paths were not initialized.");
     return false;
   }
 
-  openGothicPath = app->runtime_paths.open_gothic_executable;
-  gothicPath = app->runtime_paths.gothic_root;
-
-  return true;
-}
-
-static bool ResolveGothicRootForDiscovery(wxString &gothicRoot) {
-  gothicRoot.clear();
-
-  OpenGothicStarterApp *app = RequireInvariant(
-      dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
-      wxT("wxTheApp must be an OpenGothicStarterApp instance."));
-
-  if (!app->runtime_paths_resolved) {
-    RuntimePaths detectedPaths;
-    wxString resolveError;
-    if (!ResolveRuntimePaths(detectedPaths, resolveError)) {
-      return false;
-    }
-    app->runtime_paths = detectedPaths;
-    app->runtime_paths_resolved = true;
-  }
-
-  wxString runtimeError;
-  if (!ValidateRuntimePaths(app->runtime_paths, runtimeError)) {
-    return false;
-  }
-
-  gothicRoot = app->runtime_paths.gothic_root;
+  paths = &app->runtime_paths;
   return true;
 }
 
@@ -473,18 +423,26 @@ void MainPanel::OnStart(wxListEvent &) { DoStart(); }
 void MainPanel::OnStart(wxCommandEvent &) { DoStart(); }
 
 void MainPanel::DoStart() {
-  wxString openGothicPath;
-  wxString gothicPath;
+  const RuntimePaths *paths = nullptr;
   wxString pathError;
-  if (!ResolveLaunchPaths(openGothicPath, gothicPath, pathError)) {
+  if (!GetResolvedRuntimePaths(paths, pathError)) {
     wxMessageBox(pathError, wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
+  }
+  if (!ValidateRuntimePaths(*paths, pathError)) {
+    wxMessageBox(wxString::Format(
+                     wxT("Invalid runtime layout.\n"
+                         "Expected launcher in Gothic/system and OpenGothic executable in system.\n"
+                         "Details: %s"),
+                     pathError),
+                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
 
   wxArrayString command;
-  command.Add(openGothicPath);
+  command.Add(paths->open_gothic_executable);
   command.Add(wxT("-g"));
-  command.Add(gothicPath);
+  command.Add(paths->gothic_root);
 
   OpenGothicStarterApp *app = RequireInvariant(
       dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
@@ -547,7 +505,7 @@ void MainPanel::DoStart() {
   if (gameidx >= 0 && gameidx < (int)games.size()) {
     env.cwd = games[gameidx].datadir;
   } else {
-    env.cwd = wxFileName(gothicPath, wxT("Saves")).GetFullPath();
+    env.cwd = GetDefaultWorkingDirectory(*paths);
   }
 
   if (!wxDir::Exists(env.cwd) &&
@@ -572,12 +530,18 @@ void MainPanel::DoStart() {
 std::vector<GameEntry> MainPanel::InitGames() {
   std::vector<GameEntry> gamesList;
 
-  wxString gothicRoot;
-  if (!ResolveGothicRootForDiscovery(gothicRoot)) {
+  const RuntimePaths *paths = nullptr;
+  wxString pathError;
+  if (!GetResolvedRuntimePaths(paths, pathError)) {
+    wxLogWarning(wxT("Skipping mod discovery: %s"), pathError);
+    return gamesList;
+  }
+  if (!wxDir::Exists(paths->gothic_root) || !wxDir::Exists(paths->system_dir)) {
+    wxLogWarning(wxT("Skipping mod discovery due to invalid runtime directories."));
     return gamesList;
   }
 
-  wxString systemDir = wxFileName(gothicRoot, "system").GetFullPath();
+  wxString systemDir = paths->system_dir;
   if (!wxDir::Exists(systemDir))
     return gamesList;
 
@@ -621,9 +585,8 @@ std::vector<GameEntry> MainPanel::InitGames() {
         entry.icon.Clear();
       }
 
-      wxString dataRoot = wxFileName(gothicRoot, wxT("Saves")).GetFullPath();
       wxString modName = wxFileName(iniName).GetName();
-      entry.datadir = wxFileName(dataRoot, modName).GetFullPath();
+      entry.datadir = GetModWorkingDirectory(*paths, modName);
 
       if (!wxDir::Exists(entry.datadir) &&
           !wxFileName::Mkdir(entry.datadir, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
