@@ -592,6 +592,29 @@ bool OpenGothicStarterApp::OnInit() {
   wxInitAllImageHandlers();
   wxLog::SetActiveTarget(new wxLogStderr());
 
+  wxString resolveError;
+  RuntimePaths detectedPaths;
+  if (!ResolveRuntimePaths(detectedPaths, resolveError)) {
+    wxLogWarning(wxT("Runtime path resolution failed: %s"), resolveError);
+  } else {
+    runtime_paths = detectedPaths;
+    runtime_paths_resolved = true;
+
+    wxString validationError;
+    if (!ValidateRuntimePaths(runtime_paths, validationError)) {
+      wxLogWarning(wxT("Runtime path validation failed: %s"), validationError);
+    }
+
+    wxLogMessage(wxT("Launcher executable: %s"), runtime_paths.launcher_executable);
+    wxLogMessage(wxT("Detected Gothic root: %s"), runtime_paths.gothic_root);
+    wxLogMessage(wxT("Detected system directory: %s"), runtime_paths.system_dir);
+    wxLogMessage(wxT("Detected saves directory: %s"), runtime_paths.saves_dir);
+    if (!runtime_paths.open_gothic_executable.empty()) {
+      wxLogMessage(wxT("Detected OpenGothic executable: %s"),
+                   runtime_paths.open_gothic_executable);
+    }
+  }
+
   new MainFrame();
   return true;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "runtime_paths.h"
+
 #include <vector>
 #include <wx/filepicker.h>
 #include <wx/listctrl.h>
@@ -95,6 +97,8 @@ public:
   bool OnInit() override;
 
   wxString config_path;
+  RuntimePaths runtime_paths;
+  bool runtime_paths_resolved = false;
 
 private:
   bool InitConfig();

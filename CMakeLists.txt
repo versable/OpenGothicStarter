@@ -46,6 +46,7 @@ endif()
 set(SOURCES
     src/app.cpp
     src/pe_icon_loader.cpp
+    src/runtime_paths.cpp
 )
 
 # Create executable - Use WIN32 flag for Windows GUI apps
