@@ -182,37 +182,6 @@ static bool WriteStoredGothicVersion(const RuntimePaths &paths, int version) {
   return cfg.Flush();
 }
 
-static int DetectVersionFromGothicGameIni(const RuntimePaths &paths) {
-  const wxString iniPath =
-      wxFileName(paths.system_dir, wxT("GothicGame.ini")).GetFullPath();
-  if (!wxFileName::FileExists(iniPath)) {
-    return -1;
-  }
-
-  wxFileConfig cfg(wxEmptyString, wxEmptyString, iniPath, wxEmptyString,
-                   wxCONFIG_USE_LOCAL_FILE);
-  cfg.SetPath(wxT("/INFO"));
-
-  wxString title;
-  if (!cfg.Read(wxT("Title"), &title)) {
-    return -1;
-  }
-
-  const wxString normalized = title.Lower();
-  if (normalized.Contains(wxT("night of the raven")) ||
-      normalized.Contains(wxT("nacht des raben"))) {
-    return 2;
-  }
-  if (normalized.Contains(wxT("gothic 2")) || normalized.Contains(wxT("gothic ii"))) {
-    return 1;
-  }
-  if (normalized.Contains(wxT("gothic"))) {
-    return 0;
-  }
-
-  return -1;
-}
-
 static int DetectGothicVersion(const RuntimePaths &paths) {
   const wxString dataDir = wxFileName(paths.gothic_root, wxT("Data")).GetFullPath();
   const wxString systemDir = paths.system_dir;
@@ -225,11 +194,6 @@ static int DetectGothicVersion(const RuntimePaths &paths) {
     if (DirectoryHasFileCaseInsensitive(dataDir, marker)) {
       return 2; // Gothic 2 Night of the Raven
     }
-  }
-
-  const int iniVersion = DetectVersionFromGothicGameIni(paths);
-  if (iniVersion >= 0 && iniVersion <= 2) {
-    return iniVersion;
   }
 
   if (DirectoryHasFileCaseInsensitive(systemDir, wxT("Gothic2.exe"))) {
