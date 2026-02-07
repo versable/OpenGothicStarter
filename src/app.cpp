@@ -155,10 +155,6 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
 #endif
   EVT_SCROLL(MainPanel::OnFXAAScroll)
 wxEND_EVENT_TABLE()
-
-wxBEGIN_EVENT_TABLE(MainFrame, wxFrame)
-  EVT_BUTTON(1002, MainFrame::OnSettings)
-wxEND_EVENT_TABLE()
 // clang-format on
 
 SettingsDialog::SettingsDialog(wxWindow *parent)
@@ -258,12 +254,9 @@ void MainPanel::InitWidgets() {
 
   button_start = new wxButton(this, 1001, wxT("Start Game"));
   button_start->Enable(false);
-  button_settings = new wxButton(this, 1002, wxT("Settings"));
 
   side_sizer->AddSpacer(5);
   side_sizer->Add(button_start, 0, wxALL | wxEXPAND);
-  side_sizer->AddSpacer(3);
-  side_sizer->Add(button_settings, 0, wxALL | wxEXPAND);
 
   check_orig = new wxCheckBox(this, 2001, wxT("Start game without mods"));
   check_window = new wxCheckBox(this, 2002, wxT("Window mode"));
@@ -629,11 +622,6 @@ MainFrame::MainFrame()
               wxSize(550, 400)) {
   panel = new MainPanel(this);
   Show();
-}
-
-void MainFrame::OnSettings(wxCommandEvent &) {
-  SettingsDialog settings_dialog(this);
-  settings_dialog.ShowModal();
 }
 
 bool OpenGothicStarterApp::OnInit() {

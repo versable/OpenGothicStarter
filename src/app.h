@@ -60,7 +60,6 @@ private:
 
   wxListView *list_ctrl;
   wxButton *button_start;
-  wxButton *button_settings;
   wxCheckBox *check_orig;
   wxCheckBox *check_window;
   wxCheckBox *check_marvin;
@@ -84,12 +83,8 @@ private:
 class MainFrame : public wxFrame {
 public:
   MainFrame();
-  void OnSettings(wxCommandEvent &);
 
   MainPanel *panel;
-
-private:
-  wxDECLARE_EVENT_TABLE();
 };
 
 class OpenGothicStarterApp : public wxApp {
