@@ -58,6 +58,10 @@ static long ExecuteAsyncCommand(const wxArrayString &command,
   return wxExecute(argv.data(), wxEXEC_ASYNC, nullptr, &env);
 }
 
+static bool HasIcoImageHandler() {
+  return wxImage::FindHandler(wxBITMAP_TYPE_ICO) != nullptr;
+}
+
 template <typename T>
 static T *RequireInvariant(T *ptr, const wxString &message) {
   assert(ptr != nullptr);
@@ -202,6 +206,10 @@ static bool BuildIco(const std::vector<uint8_t> &groupIconData,
 }
 
 static bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
+  if (!HasIcoImageHandler()) {
+    return false;
+  }
+
   const wxScopedCharBuffer utf8Path = path.utf8_str();
   if (!utf8Path) {
     return false;
@@ -549,7 +557,7 @@ void MainPanel::Populate() {
         } else
 #endif
         {
-          wxBitmap bmp(games[i].icon, wxBITMAP_TYPE_ICO);
+          wxBitmap bmp(games[i].icon, wxBITMAP_TYPE_ANY);
           if (bmp.IsOk()) {
             wxImage img = bmp.ConvertToImage();
             img = img.Scale(32, 32);
@@ -858,6 +866,7 @@ bool OpenGothicStarterApp::OnInit() {
     return false;
   }
 
+  wxInitAllImageHandlers();
   wxLog::SetActiveTarget(new wxLogStderr());
 
   new MainFrame();
