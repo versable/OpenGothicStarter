@@ -12,9 +12,24 @@ endif()
 
 # Optional: pe-parse for extracting icons from Windows executables on Unix-like
 # platforms.
-find_path(PEPARSE_INCLUDE_DIR pe-parse/parse.h)
-find_library(PEPARSE_LIBRARY NAMES pe-parse peparse pe-parser-library)
-if(PEPARSE_INCLUDE_DIR AND PEPARSE_LIBRARY)
+set(OGS_BUNDLED_PEPARSE OFF)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/pe-parse/CMakeLists.txt")
+    # Keep the vendored dependency lightweight in this project.
+    set(BUILD_COMMAND_LINE_TOOLS OFF CACHE BOOL "" FORCE)
+    set(PEPARSE_ENABLE_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(PEPARSE_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+    add_subdirectory(lib/pe-parse EXCLUDE_FROM_ALL)
+    if(TARGET pe-parse::pe-parse)
+        set(OGS_BUNDLED_PEPARSE ON)
+    endif()
+endif()
+
+if(NOT OGS_BUNDLED_PEPARSE)
+    find_path(PEPARSE_INCLUDE_DIR pe-parse/parse.h)
+    find_library(PEPARSE_LIBRARY NAMES pe-parse peparse pe-parser-library)
+endif()
+
+if(OGS_BUNDLED_PEPARSE OR (PEPARSE_INCLUDE_DIR AND PEPARSE_LIBRARY))
     message(STATUS "pe-parse found: enabling PE icon extraction support")
 else()
     message(STATUS "pe-parse not found: PE icon extraction support disabled")
@@ -66,7 +81,10 @@ target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES})
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE ${wxWidgets_INCLUDE_DIRS})
 
-if(PEPARSE_INCLUDE_DIR AND PEPARSE_LIBRARY)
+if(OGS_BUNDLED_PEPARSE)
+    target_link_libraries(${PROJECT_NAME} pe-parse::pe-parse)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE OGS_HAVE_PE_PARSE=1)
+elseif(PEPARSE_INCLUDE_DIR AND PEPARSE_LIBRARY)
     target_include_directories(${PROJECT_NAME} PRIVATE ${PEPARSE_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} ${PEPARSE_LIBRARY})
     target_compile_definitions(${PROJECT_NAME} PRIVATE OGS_HAVE_PE_PARSE=1)

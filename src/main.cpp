@@ -22,7 +22,6 @@
 #include <wx/wx.h>
 
 #if defined(OGS_HAVE_PE_PARSE)
-#include <pe-parse/buffer.h>
 #include <pe-parse/parse.h>
 #endif
 
@@ -95,21 +94,15 @@ static void AppendLe32(std::vector<uint8_t> &data, uint32_t value) {
 
 static bool ReadResourceBytes(const peparse::resource &resource,
                               std::vector<uint8_t> &bytes) {
-  if (resource.sectionData == nullptr || resource.dataRVA < resource.sectionBase) {
+  if (resource.buf == nullptr) {
     return false;
   }
 
-  const uint64_t sectionOffset64 = resource.dataRVA - resource.sectionBase;
-  if (sectionOffset64 > UINT32_MAX) {
-    return false;
-  }
-
-  const uint32_t sectionOffset = static_cast<uint32_t>(sectionOffset64);
   bytes.clear();
   bytes.reserve(resource.size);
   for (uint32_t i = 0; i < resource.size; ++i) {
     uint8_t byte = 0;
-    if (!peparse::readByte(resource.sectionData, sectionOffset + i, byte)) {
+    if (!peparse::readByte(resource.buf, i, byte)) {
       return false;
     }
     bytes.push_back(byte);
@@ -214,7 +207,7 @@ static bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
     return false;
   }
 
-  peparse::parsed_pe *parsed = peparse::ParsePEFromFile(std::string(utf8Path.data()));
+  peparse::parsed_pe *parsed = peparse::ParsePEFromFile(utf8Path.data());
   if (parsed == nullptr) {
     return false;
   }
@@ -226,7 +219,7 @@ static bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
 
   peparse::IterRsrc(
       parsed,
-      [](void *N, const peparse::resource r) -> int {
+      [](void *N, const peparse::resource &r) -> int {
         auto *state = static_cast<ExtractionState *>(N);
 
         if (r.type != peparse::RT_ICON && r.type != peparse::RT_GROUP_ICON) {
@@ -239,7 +232,7 @@ static bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
         }
 
         if (r.type == peparse::RT_ICON) {
-          if (r.name >= 0 && r.name <= UINT16_MAX &&
+          if (r.name <= UINT16_MAX &&
               state->icons.find(static_cast<uint16_t>(r.name)) == state->icons.end()) {
             state->icons.emplace(static_cast<uint16_t>(r.name), std::move(bytes));
           }

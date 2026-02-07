@@ -1,0 +1,3 @@
+[submodule "lib/pe-parse"]
+	path = lib/pe-parse
+	url = https://github.com/trailofbits/pe-parse.git
