@@ -2,9 +2,9 @@ name: Multi-Platform Build
 
 on:
   push:
-    branches: [ main, devel ]
+    branches: [ main, master, devel ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
   release:
     types: [ published ]
   workflow_dispatch:
