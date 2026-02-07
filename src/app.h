@@ -3,7 +3,6 @@
 #include "runtime_paths.h"
 
 #include <vector>
-#include <wx/filepicker.h>
 #include <wx/listctrl.h>
 #include <wx/wx.h>
 
@@ -18,24 +17,6 @@ struct GameEntry {
   wxString webpage;
   wxString icon;
   wxString datadir;
-};
-
-class SettingsDialog : public wxDialog {
-public:
-  SettingsDialog(wxWindow *parent);
-
-private:
-  void OnCancel(wxCommandEvent &);
-  void OnSave(wxCommandEvent &);
-  void AddSetting(const wxString &label, wxWindow *ctrl);
-
-  wxPanel *panel;
-  wxBoxSizer *sizer;
-  wxFilePickerCtrl *ogpath;
-  wxDirPickerCtrl *gamepath;
-  wxChoice *gameversion;
-
-  wxDECLARE_EVENT_TABLE();
 };
 
 class MainPanel : public wxPanel {

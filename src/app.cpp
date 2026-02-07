@@ -10,7 +10,6 @@
 #include <wx/dir.h>
 #include <wx/fileconf.h>
 #include <wx/filename.h>
-#include <wx/filepicker.h>
 #include <wx/icon.h>
 #include <wx/imaglist.h>
 #include <wx/listctrl.h>
@@ -131,11 +130,6 @@ static bool ResolveGothicRootForDiscovery(wxString &gothicRoot) {
 }
 
 // clang-format off
-wxBEGIN_EVENT_TABLE(SettingsDialog, wxDialog)
-    EVT_BUTTON(wxID_CANCEL, SettingsDialog::OnCancel)
-    EVT_BUTTON(wxID_OK, SettingsDialog::OnSave)
-wxEND_EVENT_TABLE()
-
 wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
   EVT_SIZE(MainPanel::OnSize)
   EVT_LIST_ITEM_SELECTED(wxID_ANY, MainPanel::OnSelected)
@@ -156,85 +150,6 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
   EVT_SCROLL(MainPanel::OnFXAAScroll)
 wxEND_EVENT_TABLE()
 // clang-format on
-
-SettingsDialog::SettingsDialog(wxWindow *parent)
-    : wxDialog(parent, wxID_ANY, wxT("Settings"), wxDefaultPosition,
-               wxSize(600, -1), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) {
-
-  panel = new wxPanel(this);
-  sizer = new wxBoxSizer(wxVERTICAL);
-
-  auto *config = wxConfigBase::Get();
-
-  ogpath = new wxFilePickerCtrl(panel, wxID_ANY);
-  wxString ogPath;
-  config->Read(wxT("GENERAL/openGothicPath"), &ogPath, wxT(""));
-  ogpath->SetPath(ogPath);
-  AddSetting(wxT("OpenGothic executable:"), ogpath);
-
-  gamepath = new wxDirPickerCtrl(panel, wxID_ANY);
-  wxString gothicPath;
-  config->Read(wxT("GENERAL/gothicPath"), &gothicPath, wxT(""));
-  gamepath->SetPath(gothicPath);
-  AddSetting(wxT("Gothic directory:"), gamepath);
-
-  gameversion = new wxChoice(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                             APP_GAME_VERSIONS);
-  int version;
-  config->Read(wxT("GENERAL/gothicVersion"), &version, 2L);
-  gameversion->SetSelection(version);
-  AddSetting(wxT("Game version:"), gameversion);
-
-  wxBoxSizer *btn_sizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *button_cancel = new wxButton(panel, wxID_CANCEL, wxT("Cancel"));
-  wxButton *button_save = new wxButton(panel, wxID_OK, wxT("Apply"));
-
-  btn_sizer->AddStretchSpacer();
-  btn_sizer->Add(button_cancel);
-  btn_sizer->AddSpacer(5);
-  btn_sizer->Add(button_save);
-  btn_sizer->AddSpacer(5);
-
-  sizer->AddStretchSpacer();
-  sizer->Add(btn_sizer, 0, wxEXPAND);
-
-  panel->SetSizerAndFit(sizer);
-}
-
-void SettingsDialog::OnCancel(wxCommandEvent &) { EndModal(wxID_CANCEL); }
-
-void SettingsDialog::OnSave(wxCommandEvent &) {
-  auto *config = wxConfigBase::Get();
-
-  config->Write(wxT("GENERAL/gothicPath"), gamepath->GetPath());
-  config->Write(wxT("GENERAL/openGothicPath"), ogpath->GetPath());
-  config->Write(wxT("GENERAL/gothicVersion"),
-                (int)gameversion->GetSelection());
-  config->Flush();
-
-  MainFrame *mainFrame =
-      RequireInvariant(dynamic_cast<MainFrame *>(GetParent()),
-                       wxT("SettingsDialog parent must be MainFrame."));
-  MainPanel *mainPanel =
-      RequireInvariant(mainFrame->panel,
-                       wxT("MainFrame must always own a MainPanel instance."));
-  mainPanel->Populate();
-  mainPanel->DoOrigin();
-
-  EndModal(wxID_OK);
-}
-
-void SettingsDialog::AddSetting(const wxString &label, wxWindow *ctrl) {
-  wxBoxSizer *row_sizer = new wxBoxSizer(wxHORIZONTAL);
-  wxStaticText *labelCtrl = new wxStaticText(
-      panel, wxID_ANY, label, wxDefaultPosition, wxSize(200, -1));
-
-  row_sizer->AddSpacer(5);
-  row_sizer->Add(labelCtrl, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  row_sizer->Add(ctrl, 1, wxALL | wxEXPAND, 5);
-  row_sizer->AddSpacer(5);
-  sizer->Add(row_sizer, 0, wxEXPAND);
-}
 
 MainPanel::MainPanel(wxWindow *parent) : wxPanel(parent) {
   InitWidgets();
