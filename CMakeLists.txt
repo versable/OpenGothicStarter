@@ -44,7 +44,7 @@ endif()
 
 # Source files
 set(SOURCES
-    src/main.cpp
+    src/app.cpp
 )
 
 # Create executable - Use WIN32 flag for Windows GUI apps
