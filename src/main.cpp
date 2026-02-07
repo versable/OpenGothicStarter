@@ -786,9 +786,14 @@ std::vector<GameEntry> MainPanel::InitGames() {
 
   wxDir dir(systemDir);
   wxString iniName;
-  bool hasFile = dir.GetFirst(&iniName, "*.ini", wxDIR_FILES);
+  bool hasFile = dir.GetFirst(&iniName, wxEmptyString, wxDIR_FILES);
 
   while (hasFile) {
+    if (wxFileName(iniName).GetExt().Lower() != wxT("ini")) {
+      hasFile = dir.GetNext(&iniName);
+      continue;
+    }
+
     wxString iniPath = wxFileName(systemDir, iniName).GetFullPath();
 
     wxFileConfig cfg(wxEmptyString, wxEmptyString, iniPath, wxEmptyString,
