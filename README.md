@@ -7,8 +7,8 @@ engine reimplementation.
 
 - **Game Management**: Automatically discovers and lists Gothic mods from your
   Gothic installation
-- **Separation of save game files**: Uses the operating systems default
-  application path for save game files, separating them based on modifications.
+- **Separation of save game files**: Uses Gothic-local save directories:
+  `Gothic/Saves` for no-mod runs and `Gothic/Saves/<MOD_NAME>` for mod runs.
 - **Launch Options**: Configure various OpenGothic parameters including:
   - Window/Fullscreen mode
   - Ray tracing and global illumination
@@ -49,9 +49,8 @@ vcpkg install
 ```bash
 git clone <repository-url>
 cd OpenGothicStarter
-cmake --build .
-cmake -DCMAKE_BUILD_TYPE=Debug -B build
-make -C build
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build --parallel
 ```
 
 ## Development
@@ -76,12 +75,9 @@ git config core.hooksPath .githooks
 
 ## Setup
 
-1. **First Launch**: Run the application and click "Settings"
-2. **Configure Paths**:
-   - **OpenGothic executable**: Point to your OpenGothic binary
-   - **Gothic directory**: Point to your Gothic game installation
-   - **Game version**: Select your Gothic version
-3. **Install Mods**: Place mod `.ini` files in your `Gothic/system/` directory
+1. Copy `OpenGothicStarter` into your `Gothic/system/` directory.
+2. Ensure the OpenGothic executable is present in `Gothic/system/`.
+3. Place mod `.ini` files in `Gothic/system/`.
 
 ## Usage
 
@@ -94,3 +90,10 @@ git config core.hooksPath .githooks
 The launcher automatically scans your `Gothic/system/` directory for `.ini`
 files with `[INFO]` and `[FILES]` sections, displaying them as available mods
 with their titles and icons.
+
+## Runtime Layout
+
+- Launcher location: `Gothic/system/OpenGothicStarter(.exe)`
+- OpenGothic executable: `Gothic/system/Gothic2Notr(.exe)` (or `OpenGothic(.exe)`)
+- No-mod working directory: `Gothic/Saves`
+- Mod working directory: `Gothic/Saves/<MOD_NAME>`
