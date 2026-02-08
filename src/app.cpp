@@ -47,94 +47,7 @@ bool GothicVersionFromIndex(int index, GothicVersion &version) {
   version = kSelectableGothicVersions[index];
   return true;
 }
-
-bool GothicVersionToIndex(GothicVersion version, int &index) {
-  for (size_t i = 0; i < std::size(kSelectableGothicVersions); ++i) {
-    if (kSelectableGothicVersions[i] == version) {
-      index = static_cast<int>(i);
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool BuildGothicLaunchVersionArg(GothicVersion version, wxString &arg) {
-  switch (version) {
-  case GothicVersion::Gothic1:
-    arg = wxT("-g1");
-    return true;
-  case GothicVersion::Gothic2Classic:
-    arg = wxT("-g2c");
-    return true;
-  case GothicVersion::Gothic2Notr:
-    arg = wxT("-g2");
-    return true;
-  case GothicVersion::Unknown:
-  default:
-    arg.clear();
-    return false;
-  }
-}
-
-wxArrayString BuildGothicVersionChoices() {
-  wxArrayString choices;
-  choices.Add(_("Gothic 1"));
-  choices.Add(_("Gothic 2 Classic"));
-  choices.Add(_("Gothic 2 Night of the Raven"));
-  return choices;
-}
 } // namespace
-
-static long ExecuteAsyncCommand(const wxArrayString &command,
-                                const wxExecuteEnv &env) {
-  std::vector<std::string> argvStorage;
-  argvStorage.reserve(command.GetCount());
-
-  for (const wxString &arg : command) {
-    const std::string utf8 = arg.ToStdString(wxConvUTF8);
-    if (!arg.empty() && utf8.empty()) {
-      wxLogError(wxT("Failed to encode command argument for process launch."));
-      return 0;
-    }
-
-    argvStorage.push_back(utf8);
-  }
-
-  std::vector<const char *> argv;
-  argv.reserve(argvStorage.size() + 1);
-  for (const std::string &arg : argvStorage) {
-    argv.push_back(arg.c_str());
-  }
-  argv.push_back(nullptr);
-
-  return wxExecute(argv.data(), wxEXEC_ASYNC, nullptr, &env);
-}
-
-static wxString EscapeAndQuoteForLog(const wxString &arg) {
-  wxString escaped;
-  escaped.reserve(arg.length() + 2);
-
-  for (wxUniChar ch : arg) {
-    if (ch == wxT('\\') || ch == wxT('"')) {
-      escaped += wxT('\\');
-    }
-    escaped += ch;
-  }
-
-  return wxString::Format(wxT("\"%s\""), escaped);
-}
-
-static wxString BuildCommandLogLine(const wxArrayString &command) {
-  wxString rendered;
-  for (size_t i = 0; i < command.GetCount(); ++i) {
-    if (i > 0) {
-      rendered += wxT(" ");
-    }
-    rendered += EscapeAndQuoteForLog(command[i]);
-  }
-  return rendered;
-}
 
 template <typename T>
 static T *RequireInvariant(T *ptr, const wxString &message) {
@@ -187,29 +100,6 @@ static bool DirectoryHasFileCaseInsensitive(const wxString &dirPath,
   return false;
 }
 
-static bool TryReadStoredGothicVersion(const RuntimePaths &paths,
-                                       GothicVersion &version) {
-  const wxString configPath = GetInstallConfigPath(paths);
-  if (!wxFileName::FileExists(configPath)) {
-    return false;
-  }
-
-  wxFileConfig cfg(wxEmptyString, wxEmptyString, configPath, wxEmptyString,
-                   wxCONFIG_USE_LOCAL_FILE);
-  long value = -1;
-  if (!cfg.Read(wxT("GENERAL/gothicVersion"), &value)) {
-    return false;
-  }
-
-  GothicVersion parsedVersion = GothicVersion::Unknown;
-  if (!GothicVersionFromIndex(static_cast<int>(value), parsedVersion)) {
-    return false;
-  }
-
-  version = parsedVersion;
-  return true;
-}
-
 static bool TryReadStoredLanguageOverride(const RuntimePaths &paths,
                                           wxString &language) {
   language.clear();
@@ -233,7 +123,13 @@ static bool TryReadStoredLanguageOverride(const RuntimePaths &paths,
 static bool WriteStoredGothicVersion(const RuntimePaths &paths,
                                      GothicVersion version) {
   int selection = -1;
-  if (!GothicVersionToIndex(version, selection)) {
+  for (size_t i = 0; i < std::size(kSelectableGothicVersions); ++i) {
+    if (kSelectableGothicVersions[i] == version) {
+      selection = static_cast<int>(i);
+      break;
+    }
+  }
+  if (selection < 0) {
     return false;
   }
 
@@ -242,49 +138,6 @@ static bool WriteStoredGothicVersion(const RuntimePaths &paths,
                    wxCONFIG_USE_LOCAL_FILE);
   cfg.Write(wxT("GENERAL/gothicVersion"), static_cast<long>(selection));
   return cfg.Flush();
-}
-
-static bool WriteStoredLanguageOverride(const RuntimePaths &paths,
-                                        const wxString &language) {
-  wxString normalized = language;
-  normalized.Trim(true);
-  normalized.Trim(false);
-
-  const wxString configPath = GetInstallConfigPath(paths);
-  wxFileConfig cfg(wxEmptyString, wxEmptyString, configPath, wxEmptyString,
-                   wxCONFIG_USE_LOCAL_FILE);
-  if (normalized.empty()) {
-    cfg.DeleteEntry(wxT("GENERAL/language"), false);
-  } else {
-    cfg.Write(wxT("GENERAL/language"), normalized);
-  }
-  return cfg.Flush();
-}
-
-static GothicVersion DetectGothicVersion(const RuntimePaths &paths) {
-  const wxString dataDir = wxFileName(paths.gothic_root, wxT("Data")).GetFullPath();
-  const wxString systemDir = paths.system_dir;
-
-  const wxString addonMarkers[] = {
-      wxT("Worlds_Addon.vdf"), wxT("Anims_Addon.vdf"), wxT("Meshes_Addon.vdf"),
-      wxT("Textures_Addon.vdf"), wxT("Sounds_Addon.vdf")};
-
-  for (const wxString &marker : addonMarkers) {
-    if (DirectoryHasFileCaseInsensitive(dataDir, marker)) {
-      return GothicVersion::Gothic2Notr;
-    }
-  }
-
-  if (DirectoryHasFileCaseInsensitive(systemDir, wxT("Gothic2.exe"))) {
-    return GothicVersion::Gothic2Classic;
-  }
-
-  if (DirectoryHasFileCaseInsensitive(systemDir, wxT("GOTHIC.EXE")) ||
-      DirectoryHasFileCaseInsensitive(systemDir, wxT("GothicMod.exe"))) {
-    return GothicVersion::Gothic1;
-  }
-
-  return GothicVersion::Unknown;
 }
 
 static wxString GothicVersionLabel(GothicVersion version) {
@@ -550,12 +403,21 @@ bool MainPanel::BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
   OpenGothicStarterApp *app = RequireInvariant(
       dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
       wxT("wxTheApp must be an OpenGothicStarterApp instance."));
-  wxString versionArg;
-  if (!BuildGothicLaunchVersionArg(app->gothic_version, versionArg)) {
+  switch (app->gothic_version) {
+  case GothicVersion::Gothic1:
+    command.Add(wxT("-g1"));
+    break;
+  case GothicVersion::Gothic2Classic:
+    command.Add(wxT("-g2c"));
+    break;
+  case GothicVersion::Gothic2Notr:
+    command.Add(wxT("-g2"));
+    break;
+  case GothicVersion::Unknown:
+  default:
     error = _("Stored Gothic version is invalid. Please restart and select a valid version.");
     return false;
   }
-  command.Add(versionArg);
 
   if (gameidx >= 0) {
     const size_t selectedIndex = static_cast<size_t>(gameidx);
@@ -665,10 +527,48 @@ void MainPanel::DoStart() {
     return;
   }
 
-  wxLogMessage(wxT("Starting game command: %s"), BuildCommandLogLine(command));
+  wxString renderedCommand;
+  for (size_t i = 0; i < command.GetCount(); ++i) {
+    if (i > 0) {
+      renderedCommand += wxT(" ");
+    }
+
+    wxString escaped;
+    const wxString &arg = command[i];
+    escaped.reserve(arg.length() + 2);
+    for (wxUniChar ch : arg) {
+      if (ch == wxT('\\') || ch == wxT('"')) {
+        escaped += wxT('\\');
+      }
+      escaped += ch;
+    }
+
+    renderedCommand += wxString::Format(wxT("\"%s\""), escaped);
+  }
+  wxLogMessage(wxT("Starting game command: %s"), renderedCommand);
   wxLogMessage(wxT("Working directory: %s"), env.cwd);
 
-  const long pid = ExecuteAsyncCommand(command, env);
+  std::vector<std::string> argvStorage;
+  argvStorage.reserve(command.GetCount());
+  for (const wxString &arg : command) {
+    const std::string utf8 = arg.ToStdString(wxConvUTF8);
+    if (!arg.empty() && utf8.empty()) {
+      wxLogError(wxT("Failed to encode command argument for process launch."));
+      wxMessageBox(_("Failed to start OpenGothic process."), _("Launch Failed"),
+                   wxOK | wxICON_ERROR);
+      return;
+    }
+    argvStorage.push_back(utf8);
+  }
+
+  std::vector<const char *> argv;
+  argv.reserve(argvStorage.size() + 1);
+  for (const std::string &arg : argvStorage) {
+    argv.push_back(arg.c_str());
+  }
+  argv.push_back(nullptr);
+
+  const long pid = wxExecute(argv.data(), wxEXEC_ASYNC, nullptr, &env);
   if (pid == 0) {
     wxMessageBox(_("Failed to start OpenGothic process."), _("Launch Failed"),
                  wxOK | wxICON_ERROR);
@@ -714,10 +614,24 @@ void MainPanel::DoSettings() {
         _("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
-  if (!WriteStoredLanguageOverride(*paths, selectedLanguage)) {
+
+  wxString normalizedLanguage = selectedLanguage;
+  normalizedLanguage.Trim(true);
+  normalizedLanguage.Trim(false);
+
+  const wxString configPath = GetInstallConfigPath(*paths);
+  wxFileConfig cfg(wxEmptyString, wxEmptyString, configPath, wxEmptyString,
+                   wxCONFIG_USE_LOCAL_FILE);
+  if (normalizedLanguage.empty()) {
+    cfg.DeleteEntry(wxT("GENERAL/language"), false);
+  } else {
+    cfg.Write(wxT("GENERAL/language"), normalizedLanguage);
+  }
+
+  if (!cfg.Flush()) {
     wxMessageBox(
         wxString::Format(_("Failed to save language setting to:\n%s"),
-                         GetInstallConfigPath(*paths)),
+                         configPath),
         _("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
@@ -906,28 +820,61 @@ bool OpenGothicStarterApp::InitGothicVersion() {
     return false;
   }
 
-  GothicVersion storedVersion = GothicVersion::Unknown;
-  if (TryReadStoredGothicVersion(runtime_paths, storedVersion)) {
-    gothic_version = storedVersion;
-    wxLogMessage(wxT("Using stored Gothic version: %s"),
-                 GothicVersionLabel(gothic_version));
-    return true;
+  const wxString configPath = GetInstallConfigPath(runtime_paths);
+  if (wxFileName::FileExists(configPath)) {
+    wxFileConfig cfg(wxEmptyString, wxEmptyString, configPath, wxEmptyString,
+                     wxCONFIG_USE_LOCAL_FILE);
+    long value = -1;
+    GothicVersion parsedVersion = GothicVersion::Unknown;
+    if (cfg.Read(wxT("GENERAL/gothicVersion"), &value) &&
+        GothicVersionFromIndex(static_cast<int>(value), parsedVersion)) {
+      gothic_version = parsedVersion;
+      wxLogMessage(wxT("Using stored Gothic version: %s"),
+                   GothicVersionLabel(gothic_version));
+      return true;
+    }
   }
 
-  const GothicVersion detectedVersion = DetectGothicVersion(runtime_paths);
+  const wxString dataDir = wxFileName(runtime_paths.gothic_root, wxT("Data")).GetFullPath();
+  const wxString systemDir = runtime_paths.system_dir;
+
+  const wxString addonMarkers[] = {
+      wxT("Worlds_Addon.vdf"), wxT("Anims_Addon.vdf"), wxT("Meshes_Addon.vdf"),
+      wxT("Textures_Addon.vdf"), wxT("Sounds_Addon.vdf")};
+
+  GothicVersion detectedVersion = GothicVersion::Unknown;
+  for (const wxString &marker : addonMarkers) {
+    if (DirectoryHasFileCaseInsensitive(dataDir, marker)) {
+      detectedVersion = GothicVersion::Gothic2Notr;
+      break;
+    }
+  }
+
+  if (detectedVersion == GothicVersion::Unknown &&
+      DirectoryHasFileCaseInsensitive(systemDir, wxT("Gothic2.exe"))) {
+    detectedVersion = GothicVersion::Gothic2Classic;
+  }
+
+  if (detectedVersion == GothicVersion::Unknown &&
+      (DirectoryHasFileCaseInsensitive(systemDir, wxT("GOTHIC.EXE")) ||
+       DirectoryHasFileCaseInsensitive(systemDir, wxT("GothicMod.exe")))) {
+    detectedVersion = GothicVersion::Gothic1;
+  }
+
   if (detectedVersion != GothicVersion::Unknown) {
     gothic_version = detectedVersion;
     if (!WriteStoredGothicVersion(runtime_paths, gothic_version)) {
       wxLogWarning(wxT("Failed to persist detected Gothic version to %s"),
-                   GetInstallConfigPath(runtime_paths));
+                   configPath);
     }
-    wxLogMessage(wxT("Detected Gothic version: %s"),
-                 GothicVersionLabel(gothic_version));
+    wxLogMessage(wxT("Detected Gothic version: %s"), GothicVersionLabel(gothic_version));
     return true;
   }
 
-  const wxString configPath = GetInstallConfigPath(runtime_paths);
-  const wxArrayString choices = BuildGothicVersionChoices();
+  wxArrayString choices;
+  choices.Add(_("Gothic 1"));
+  choices.Add(_("Gothic 2 Classic"));
+  choices.Add(_("Gothic 2 Night of the Raven"));
 
   wxSingleChoiceDialog dialog(
       nullptr,

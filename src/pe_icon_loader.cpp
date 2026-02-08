@@ -12,8 +12,6 @@
 
 namespace {
 
-bool HasIcoImageHandler() { return wxImage::FindHandler(wxBITMAP_TYPE_ICO) != nullptr; }
-
 bool ReadLe16(const std::vector<uint8_t> &data, size_t offset, uint16_t &value) {
   if (offset + 2 > data.size()) {
     return false;
@@ -38,24 +36,6 @@ void AppendLe32(std::vector<uint8_t> &data, uint32_t value) {
   data.push_back(static_cast<uint8_t>((value >> 24) & 0xFFu));
 }
 
-bool ReadResourceBytes(const peparse::resource &resource, std::vector<uint8_t> &bytes) {
-  if (resource.buf == nullptr) {
-    return false;
-  }
-
-  bytes.clear();
-  bytes.reserve(resource.size);
-  for (uint32_t i = 0; i < resource.size; ++i) {
-    uint8_t byte = 0;
-    if (!peparse::readByte(resource.buf, i, byte)) {
-      return false;
-    }
-    bytes.push_back(byte);
-  }
-
-  return true;
-}
-
 struct GroupIconEntry {
   uint8_t width;
   uint8_t height;
@@ -67,91 +47,12 @@ struct GroupIconEntry {
   std::vector<uint8_t> imageData;
 };
 
-bool BuildIco(const std::vector<uint8_t> &groupIconData,
-              const std::map<uint16_t, std::vector<uint8_t>> &icons,
-              std::vector<uint8_t> &icoData) {
-  uint16_t reserved = 0;
-  uint16_t type = 0;
-  uint16_t count = 0;
-  if (!ReadLe16(groupIconData, 0, reserved) || !ReadLe16(groupIconData, 2, type) ||
-      !ReadLe16(groupIconData, 4, count)) {
-    return false;
-  }
-  if (reserved != 0 || type != 1) {
-    return false;
-  }
-
-  if (groupIconData.size() < 6 + static_cast<size_t>(count) * 14) {
-    return false;
-  }
-
-  std::vector<GroupIconEntry> entries;
-  entries.reserve(count);
-
-  for (uint16_t i = 0; i < count; ++i) {
-    const size_t offset = 6 + static_cast<size_t>(i) * 14;
-
-    uint16_t planes = 0;
-    uint16_t bitCount = 0;
-    uint16_t resourceId = 0;
-    if (!ReadLe16(groupIconData, offset + 4, planes) ||
-        !ReadLe16(groupIconData, offset + 6, bitCount) ||
-        !ReadLe16(groupIconData, offset + 12, resourceId)) {
-      continue;
-    }
-
-    const auto it = icons.find(resourceId);
-    if (it == icons.end()) {
-      continue;
-    }
-
-    GroupIconEntry entry{};
-    entry.width = groupIconData[offset];
-    entry.height = groupIconData[offset + 1];
-    entry.colorCount = groupIconData[offset + 2];
-    entry.reserved = groupIconData[offset + 3];
-    entry.planes = planes;
-    entry.bitCount = bitCount;
-    entry.resourceId = resourceId;
-    entry.imageData = it->second;
-    entries.push_back(std::move(entry));
-  }
-
-  if (entries.empty()) {
-    return false;
-  }
-
-  icoData.clear();
-  AppendLe16(icoData, 0);
-  AppendLe16(icoData, 1);
-  AppendLe16(icoData, static_cast<uint16_t>(entries.size()));
-
-  uint32_t imageOffset = 6 + static_cast<uint32_t>(entries.size()) * 16;
-  for (const GroupIconEntry &entry : entries) {
-    icoData.push_back(entry.width);
-    icoData.push_back(entry.height);
-    icoData.push_back(entry.colorCount);
-    icoData.push_back(entry.reserved);
-    AppendLe16(icoData, entry.planes);
-    AppendLe16(icoData, entry.bitCount);
-    AppendLe32(icoData, static_cast<uint32_t>(entry.imageData.size()));
-    AppendLe32(icoData, imageOffset);
-    imageOffset += static_cast<uint32_t>(entry.imageData.size());
-  }
-
-  for (const GroupIconEntry &entry : entries) {
-    icoData.insert(icoData.end(), entry.imageData.begin(), entry.imageData.end());
-  }
-
-  return true;
-}
-
 } // namespace
 #endif
 
 bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
 #if defined(OGS_HAVE_PE_PARSE) && !defined(_WIN32)
-  if (!HasIcoImageHandler()) {
+  if (wxImage::FindHandler(wxBITMAP_TYPE_ICO) == nullptr) {
     return false;
   }
 
@@ -180,7 +81,19 @@ bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
         }
 
         std::vector<uint8_t> bytes;
-        if (!ReadResourceBytes(r, bytes)) {
+        if (r.buf == nullptr) {
+          return 0;
+        }
+        bytes.reserve(r.size);
+        for (uint32_t i = 0; i < r.size; ++i) {
+          uint8_t byte = 0;
+          if (!peparse::readByte(r.buf, i, byte)) {
+            return 0;
+          }
+          bytes.push_back(byte);
+        }
+
+        if (bytes.empty()) {
           return 0;
         }
 
@@ -205,9 +118,75 @@ bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
     return false;
   }
 
-  std::vector<uint8_t> icoData;
-  if (!BuildIco(extractionState.groupIconData, extractionState.icons, icoData)) {
+  uint16_t reserved = 0;
+  uint16_t type = 0;
+  uint16_t count = 0;
+  if (!ReadLe16(extractionState.groupIconData, 0, reserved) ||
+      !ReadLe16(extractionState.groupIconData, 2, type) ||
+      !ReadLe16(extractionState.groupIconData, 4, count)) {
     return false;
+  }
+  if (reserved != 0 || type != 1) {
+    return false;
+  }
+  if (extractionState.groupIconData.size() < 6 + static_cast<size_t>(count) * 14) {
+    return false;
+  }
+
+  std::vector<GroupIconEntry> entries;
+  entries.reserve(count);
+  for (uint16_t i = 0; i < count; ++i) {
+    const size_t offset = 6 + static_cast<size_t>(i) * 14;
+
+    uint16_t planes = 0;
+    uint16_t bitCount = 0;
+    uint16_t resourceId = 0;
+    if (!ReadLe16(extractionState.groupIconData, offset + 4, planes) ||
+        !ReadLe16(extractionState.groupIconData, offset + 6, bitCount) ||
+        !ReadLe16(extractionState.groupIconData, offset + 12, resourceId)) {
+      continue;
+    }
+
+    const auto it = extractionState.icons.find(resourceId);
+    if (it == extractionState.icons.end()) {
+      continue;
+    }
+
+    GroupIconEntry entry{};
+    entry.width = extractionState.groupIconData[offset];
+    entry.height = extractionState.groupIconData[offset + 1];
+    entry.colorCount = extractionState.groupIconData[offset + 2];
+    entry.reserved = extractionState.groupIconData[offset + 3];
+    entry.planes = planes;
+    entry.bitCount = bitCount;
+    entry.resourceId = resourceId;
+    entry.imageData = it->second;
+    entries.push_back(std::move(entry));
+  }
+  if (entries.empty()) {
+    return false;
+  }
+
+  std::vector<uint8_t> icoData;
+  AppendLe16(icoData, 0);
+  AppendLe16(icoData, 1);
+  AppendLe16(icoData, static_cast<uint16_t>(entries.size()));
+
+  uint32_t imageOffset = 6 + static_cast<uint32_t>(entries.size()) * 16;
+  for (const GroupIconEntry &entry : entries) {
+    icoData.push_back(entry.width);
+    icoData.push_back(entry.height);
+    icoData.push_back(entry.colorCount);
+    icoData.push_back(entry.reserved);
+    AppendLe16(icoData, entry.planes);
+    AppendLe16(icoData, entry.bitCount);
+    AppendLe32(icoData, static_cast<uint32_t>(entry.imageData.size()));
+    AppendLe32(icoData, imageOffset);
+    imageOffset += static_cast<uint32_t>(entry.imageData.size());
+  }
+
+  for (const GroupIconEntry &entry : entries) {
+    icoData.insert(icoData.end(), entry.imageData.begin(), entry.imageData.end());
   }
 
   wxMemoryInputStream icoStream(icoData.data(), icoData.size());

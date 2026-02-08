@@ -11,48 +11,6 @@ namespace {
 const wxString kI18nDomain = wxT("opengothicstarter");
 bool gLocalizationLookupPathsRegistered = false;
 
-void AddCatalogLookupPathIfExists(const wxString &path) {
-  if (!wxDir::Exists(path)) {
-    return;
-  }
-
-  wxLocale::AddCatalogLookupPathPrefix(path);
-  wxLogMessage(wxT("Localization lookup path: %s"), path);
-}
-
-wxArrayString BuildLocalizationLookupPaths() {
-  wxArrayString paths;
-
-  wxFileName exeFile(wxStandardPaths::Get().GetExecutablePath());
-  exeFile.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
-  const wxString exeDir = exeFile.GetPath();
-
-  paths.Add(wxFileName(exeDir, wxT("locale")).GetFullPath());
-
-  wxFileName installPrefix(exeDir, wxEmptyString);
-  installPrefix.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
-  if (!installPrefix.GetDirs().empty()) {
-    installPrefix.RemoveLastDir(); // bin -> install prefix
-    const wxString shareDir =
-        wxFileName(installPrefix.GetPath(), wxT("share")).GetFullPath();
-    paths.Add(wxFileName(shareDir, wxT("locale")).GetFullPath());
-  }
-
-  return paths;
-}
-
-void RegisterLocalizationLookupPaths() {
-  if (gLocalizationLookupPathsRegistered) {
-    return;
-  }
-
-  const wxArrayString lookupPaths = BuildLocalizationLookupPaths();
-  for (const wxString &path : lookupPaths) {
-    AddCatalogLookupPathIfExists(path);
-  }
-  gLocalizationLookupPathsRegistered = true;
-}
-
 bool InitLocale(wxLocale &locale, int language) {
   if (language == wxLANGUAGE_UNKNOWN) {
     return false;
@@ -64,7 +22,35 @@ bool InitLocale(wxLocale &locale, int language) {
 
 void InitializeLocalization(std::unique_ptr<wxLocale> &app_locale,
                             const wxString &languageOverride) {
-  RegisterLocalizationLookupPaths();
+  if (!gLocalizationLookupPathsRegistered) {
+    wxArrayString lookupPaths;
+
+    wxFileName exeFile(wxStandardPaths::Get().GetExecutablePath());
+    exeFile.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
+    const wxString exeDir = exeFile.GetPath();
+
+    lookupPaths.Add(wxFileName(exeDir, wxT("locale")).GetFullPath());
+
+    wxFileName installPrefix(exeDir, wxEmptyString);
+    installPrefix.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
+    if (!installPrefix.GetDirs().empty()) {
+      installPrefix.RemoveLastDir(); // bin -> install prefix
+      const wxString shareDir =
+          wxFileName(installPrefix.GetPath(), wxT("share")).GetFullPath();
+      lookupPaths.Add(wxFileName(shareDir, wxT("locale")).GetFullPath());
+    }
+
+    for (const wxString &path : lookupPaths) {
+      if (!wxDir::Exists(path)) {
+        continue;
+      }
+
+      wxLocale::AddCatalogLookupPathPrefix(path);
+      wxLogMessage(wxT("Localization lookup path: %s"), path);
+    }
+
+    gLocalizationLookupPathsRegistered = true;
+  }
 
   int requestedLanguage = wxLANGUAGE_UNKNOWN;
   bool hasOverride = false;

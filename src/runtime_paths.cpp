@@ -4,27 +4,6 @@
 #include <wx/filename.h>
 #include <wx/stdpaths.h>
 
-namespace {
-
-wxString FindOpenGothicExecutable(const wxString &system_dir) {
-#if defined(_WIN32)
-  static const wxString candidates[] = {wxT("Gothic2Notr.exe")};
-#else
-  static const wxString candidates[] = {wxT("Gothic2Notr")};
-#endif
-
-  for (const wxString &name : candidates) {
-    const wxString path = wxFileName(system_dir, name).GetFullPath();
-    if (wxFileName::FileExists(path)) {
-      return path;
-    }
-  }
-
-  return wxEmptyString;
-}
-
-} // namespace
-
 bool ResolveRuntimePaths(RuntimePaths &paths, wxString &error) {
   error.clear();
   paths = RuntimePaths{};
@@ -74,7 +53,19 @@ bool ResolveRuntimePaths(RuntimePaths &paths, wxString &error) {
     return false;
   }
 
-  paths.open_gothic_executable = FindOpenGothicExecutable(paths.system_dir);
+  paths.open_gothic_executable.clear();
+#if defined(_WIN32)
+  static const wxString candidates[] = {wxT("Gothic2Notr.exe")};
+#else
+  static const wxString candidates[] = {wxT("Gothic2Notr")};
+#endif
+  for (const wxString &name : candidates) {
+    const wxString path = wxFileName(paths.system_dir, name).GetFullPath();
+    if (wxFileName::FileExists(path)) {
+      paths.open_gothic_executable = path;
+      break;
+    }
+  }
   paths.saves_dir = wxFileName(paths.gothic_root, wxT("Saves")).GetFullPath();
 
   return true;
