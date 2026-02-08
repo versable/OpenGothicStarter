@@ -85,6 +85,8 @@ public:
   GothicVersion gothic_version = GothicVersion::Unknown;
 
 private:
+  friend class MainPanel;
+
   bool InitConfig();
   bool InitGothicVersion();
 

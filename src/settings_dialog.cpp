@@ -129,6 +129,10 @@ SettingsDialog::SettingsDialog(wxWindow *parent, GothicVersion initialVersion,
   auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   auto *cancelButton = new wxButton(panel, wxID_CANCEL);
   auto *applyButton = new wxButton(panel, wxID_SAVE);
+  cancelButton->Bind(wxEVT_BUTTON,
+                     [this](wxCommandEvent &) { EndModal(wxID_CANCEL); });
+  applyButton->Bind(wxEVT_BUTTON,
+                    [this](wxCommandEvent &) { EndModal(wxID_SAVE); });
   buttonSizer->AddStretchSpacer();
   buttonSizer->Add(cancelButton);
   buttonSizer->AddSpacer(5);

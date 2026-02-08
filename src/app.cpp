@@ -637,12 +637,37 @@ void MainPanel::DoSettings() {
   }
 
   app->gothic_version = selectedVersion;
-  if (selectedLanguage == currentLanguage) {
-    wxMessageBox(_("Settings saved."), _("Settings"),
-                 wxOK | wxICON_INFORMATION);
-  } else {
-    wxMessageBox(_("Settings saved. Restart the launcher to apply language changes."),
-                 _("Settings"), wxOK | wxICON_INFORMATION);
+
+  wxString normalizedCurrentLanguage = currentLanguage;
+  normalizedCurrentLanguage.Trim(true);
+  normalizedCurrentLanguage.Trim(false);
+
+  if (normalizedLanguage.CmpNoCase(normalizedCurrentLanguage) != 0) {
+    InitializeLocalization(app->app_locale, normalizedLanguage);
+
+    wxWindow *topWindow = wxTheApp->GetTopWindow();
+    const bool hasWindowGeometry = topWindow != nullptr;
+    wxPoint framePosition = wxDefaultPosition;
+    wxSize frameSize = wxDefaultSize;
+    if (hasWindowGeometry) {
+      framePosition = topWindow->GetPosition();
+      frameSize = topWindow->GetSize();
+    }
+
+    CallAfter([hasWindowGeometry, framePosition, frameSize]() {
+      wxWindow *currentTopWindow = wxTheApp->GetTopWindow();
+      auto *newFrame = new MainFrame();
+      if (hasWindowGeometry) {
+        newFrame->SetPosition(framePosition);
+        newFrame->SetSize(frameSize);
+      }
+
+      wxTheApp->SetTopWindow(newFrame);
+
+      if (currentTopWindow != nullptr && currentTopWindow != newFrame) {
+        currentTopWindow->Destroy();
+      }
+    });
   }
 }
 

@@ -5,6 +5,7 @@
 #include <wx/intl.h>
 #include <wx/log.h>
 #include <wx/stdpaths.h>
+#include <wx/translation.h>
 
 namespace {
 
@@ -54,11 +55,13 @@ void InitializeLocalization(std::unique_ptr<wxLocale> &app_locale,
 
   int requestedLanguage = wxLANGUAGE_UNKNOWN;
   bool hasOverride = false;
+  wxString overrideCanonicalLanguage;
   if (!languageOverride.empty()) {
     const wxLanguageInfo *langInfo = wxLocale::FindLanguageInfo(languageOverride);
     if (langInfo != nullptr) {
       hasOverride = true;
       requestedLanguage = langInfo->Language;
+      overrideCanonicalLanguage = langInfo->CanonicalName;
     } else {
       wxLogWarning(wxT("Invalid language override '%s'. Falling back to system locale."),
                    languageOverride);
@@ -85,9 +88,32 @@ void InitializeLocalization(std::unique_ptr<wxLocale> &app_locale,
     }
   }
 
-  if (!app_locale->AddCatalog(kI18nDomain)) {
+  wxString catalogLanguage;
+  if (hasOverride && !overrideCanonicalLanguage.empty()) {
+    catalogLanguage = overrideCanonicalLanguage;
+  } else if (app_locale->IsOk()) {
+    catalogLanguage = app_locale->GetCanonicalName();
+  }
+
+  wxTranslations *translations = wxTranslations::Get();
+  if (translations == nullptr) {
+    translations = new wxTranslations();
+    wxTranslations::Set(translations);
+  }
+
+  if (!catalogLanguage.empty()) {
+    translations->SetLanguage(catalogLanguage);
+  }
+
+  if (!translations->AddCatalog(kI18nDomain, wxLANGUAGE_ENGLISH_US)) {
     wxLogMessage(
         wxT("No translation catalog found for domain '%s'. Using source language strings."),
         kI18nDomain);
+    return;
+  }
+
+  if (!catalogLanguage.empty()) {
+    wxLogMessage(wxT("Loaded translation catalog '%s' for language '%s'."),
+                 kI18nDomain, catalogLanguage);
   }
 }
