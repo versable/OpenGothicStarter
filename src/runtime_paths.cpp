@@ -8,10 +8,9 @@ namespace {
 
 wxString FindOpenGothicExecutable(const wxString &system_dir) {
 #if defined(_WIN32)
-  static const wxString candidates[] = {wxT("Gothic2Notr.exe"),
-                                        wxT("OpenGothic.exe")};
+  static const wxString candidates[] = {wxT("Gothic2Notr.exe")};
 #else
-  static const wxString candidates[] = {wxT("Gothic2Notr"), wxT("OpenGothic")};
+  static const wxString candidates[] = {wxT("Gothic2Notr")};
 #endif
 
   for (const wxString &name : candidates) {

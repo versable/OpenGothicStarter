@@ -680,7 +680,7 @@ bool OpenGothicStarterApp::OnInit() {
                          "Current location:\n%s\n\n"
                          "Expected layout:\n"
                          "<Gothic>/system/OpenGothicStarter\n"
-                         "<Gothic>/system/Gothic2Notr (or OpenGothic)"),
+                         "<Gothic>/system/Gothic2Notr"),
                      wxStandardPaths::Get().GetExecutablePath()),
                  wxT("Invalid Launcher Location"), wxOK | wxICON_ERROR);
     return false;
@@ -697,8 +697,7 @@ bool OpenGothicStarterApp::OnInit() {
                          "'system' directory.\n\n"
                          "Checked directory:\n%s\n\n"
                          "Expected executable names:\n"
-                         "- Gothic2Notr\n"
-                         "- OpenGothic"),
+                         "- Gothic2Notr"),
                      runtime_paths.system_dir),
                  wxT("OpenGothic Not Found"), wxOK | wxICON_ERROR);
     return false;
