@@ -115,7 +115,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: opengothicstarter_${{ needs.setup.outputs.semver }}_linux_x64
-        path: build/OpenGothicStarter
+        path: |
+          build/OpenGothicStarter
+          build/locale
 
   windows:
     needs: [setup, format, tidy]
@@ -175,7 +177,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: opengothicstarter_${{ needs.setup.outputs.semver }}_win_x64
-        path: build/OpenGothicStarter.exe
+        path: |
+          build/OpenGothicStarter.exe
+          build/locale
 
   macos-arm64:
     needs: [setup, format, tidy]
@@ -196,7 +200,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: opengothicstarter_${{ needs.setup.outputs.semver }}_osx_arm64
-        path: build/OpenGothicStarter
+        path: |
+          build/OpenGothicStarter
+          build/locale
 
   macos-x64:
     needs: [setup, format, tidy]
@@ -217,7 +223,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: opengothicstarter_${{ needs.setup.outputs.semver }}_osx_x64
-        path: build/OpenGothicStarter
+        path: |
+          build/OpenGothicStarter
+          build/locale
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
