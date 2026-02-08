@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on Common Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.3.0] - 2026-02-08
+
+- Added install-level `SystemPack.ini` settings support in a dedicated
+  Settings dialog tab, including persistence for mapped OpenGothic options.
+- Updated localization catalogs (`.pot`, `en`, `de`) for new SystemPack UI
+  strings.
+- Updated the pre-commit hook to auto-refresh and stage POT/PO catalogs when
+  source strings change.
+- Documented Windows SmartScreen first-run behavior in `README.md`.
+
 ## [0.2.2] - 2026-02-08
 
 - Bundled required runtime DLLs in Windows release artifacts to avoid missing
@@ -65,6 +75,7 @@ and this project adheres to Semantic Versioning.
 
 _First release._
 
+[0.3.0]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.3.0
 [0.2.2]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.2
 [0.2.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.1
 [0.2.0]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.0
