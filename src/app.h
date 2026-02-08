@@ -33,6 +33,11 @@ private:
   void OnParams(wxCommandEvent &);
   void OnFXAAScroll(wxCommandEvent &);
   void DoStart();
+  bool BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
+                          wxArrayString &command, wxString &error) const;
+  wxString ResolveWorkingDirectory(const RuntimePaths &paths, int gameidx) const;
+  bool EnsureWorkingDirectoryExists(const wxString &path, wxString &error) const;
+  int GetSelectedGameIndex() const;
   void SaveParams();
   void LoadParams();
   std::vector<GameEntry> InitGames();

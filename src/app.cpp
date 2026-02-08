@@ -421,34 +421,28 @@ void MainPanel::OnStart(wxListEvent &) { DoStart(); }
 
 void MainPanel::OnStart(wxCommandEvent &) { DoStart(); }
 
-void MainPanel::DoStart() {
-  const RuntimePaths *paths = nullptr;
-  wxString pathError;
-  if (!GetResolvedRuntimePaths(paths, pathError)) {
-    wxMessageBox(pathError, wxT("Configuration Error"), wxOK | wxICON_ERROR);
-    return;
+int MainPanel::GetSelectedGameIndex() const {
+  const long selected = list_ctrl->GetFirstSelected();
+  if (selected < 0 || selected >= static_cast<long>(games.size())) {
+    return -1;
   }
-  if (!ValidateRuntimePaths(*paths, pathError)) {
-    wxMessageBox(wxString::Format(
-                     wxT("Invalid runtime layout.\n"
-                         "Expected launcher in Gothic/system and OpenGothic executable in system.\n"
-                         "Details: %s"),
-                     pathError),
-                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
-    return;
-  }
+  return static_cast<int>(selected);
+}
 
-  wxArrayString command;
-  command.Add(paths->open_gothic_executable);
+bool MainPanel::BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
+                                   wxArrayString &command,
+                                   wxString &error) const {
+  command.clear();
+  error.clear();
+
+  command.Add(paths.open_gothic_executable);
   command.Add(wxT("-g"));
-  command.Add(paths->gothic_root);
+  command.Add(paths.gothic_root);
 
   OpenGothicStarterApp *app = RequireInvariant(
       dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
       wxT("wxTheApp must be an OpenGothicStarterApp instance."));
-  const int version = app->gothic_version;
-
-  switch (version) {
+  switch (app->gothic_version) {
   case 0:
     command.Add(wxT("-g1"));
     break;
@@ -459,13 +453,11 @@ void MainPanel::DoStart() {
     command.Add(wxT("-g2"));
     break;
   default:
-    wxMessageBox(wxT("Stored Gothic version is invalid. Please restart and select a valid version."),
-                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
-    return;
+    error = wxT("Stored Gothic version is invalid. Please restart and select a valid version.");
+    return false;
   }
 
-  int gameidx = list_ctrl->GetFirstSelected();
-  if (gameidx >= 0 && gameidx < (int)games.size()) {
+  if (gameidx >= 0) {
     command.Add(wxT("-game:") + games[gameidx].file);
   }
 
@@ -500,18 +492,62 @@ void MainPanel::DoStart() {
     command.Add(wxString::Format(wxT("%d"), fxaa));
   }
 
-  wxExecuteEnv env;
-  if (gameidx >= 0 && gameidx < (int)games.size()) {
-    env.cwd = games[gameidx].datadir;
-  } else {
-    env.cwd = GetDefaultWorkingDirectory(*paths);
+  return true;
+}
+
+wxString MainPanel::ResolveWorkingDirectory(const RuntimePaths &paths,
+                                            int gameidx) const {
+  if (gameidx >= 0) {
+    return games[gameidx].datadir;
+  }
+  return GetDefaultWorkingDirectory(paths);
+}
+
+bool MainPanel::EnsureWorkingDirectoryExists(const wxString &path,
+                                             wxString &error) const {
+  error.clear();
+  if (wxDir::Exists(path)) {
+    return true;
   }
 
-  if (!wxDir::Exists(env.cwd) &&
-      !wxFileName::Mkdir(env.cwd, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
-    wxMessageBox(wxString::Format(wxT("Failed to create working directory: %s"),
-                                  env.cwd),
+  if (!wxFileName::Mkdir(path, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL)) {
+    error = wxString::Format(wxT("Failed to create working directory: %s"), path);
+    return false;
+  }
+
+  return true;
+}
+
+void MainPanel::DoStart() {
+  const RuntimePaths *paths = nullptr;
+  wxString pathError;
+  if (!GetResolvedRuntimePaths(paths, pathError)) {
+    wxMessageBox(pathError, wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
+  }
+  if (!ValidateRuntimePaths(*paths, pathError)) {
+    wxMessageBox(wxString::Format(
+                     wxT("Invalid runtime layout.\n"
+                         "Expected launcher in Gothic/system and OpenGothic executable in system.\n"
+                         "Details: %s"),
+                     pathError),
                  wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
+  }
+
+  const int gameidx = GetSelectedGameIndex();
+  wxArrayString command;
+  wxString commandError;
+  if (!BuildLaunchCommand(*paths, gameidx, command, commandError)) {
+    wxMessageBox(commandError, wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
+  }
+
+  wxExecuteEnv env;
+  env.cwd = ResolveWorkingDirectory(*paths, gameidx);
+  wxString directoryError;
+  if (!EnsureWorkingDirectoryExists(env.cwd, directoryError)) {
+    wxMessageBox(directoryError, wxT("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
 
