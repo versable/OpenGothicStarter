@@ -48,6 +48,7 @@ endif()
 # Source files
 set(SOURCES
     src/app.cpp
+    src/embedded_locales.cpp
     src/localization.cpp
     src/pe_icon_loader.cpp
     src/runtime_paths.cpp
@@ -179,6 +180,10 @@ file(GLOB OGS_I18N_PO_FILES RELATIVE "${OGS_I18N_SOURCE_DIR}"
 
 set(OGS_I18N_MO_FILES "")
 set(OGS_I18N_LOCALES "")
+set(OGS_EMBEDDED_LOCALE_DIR "${CMAKE_CURRENT_BINARY_DIR}/embedded")
+set(OGS_EMBEDDED_LOCALE_ZIP "${OGS_EMBEDDED_LOCALE_DIR}/opengothicstarter-locales.zip")
+set(OGS_EMBEDDED_LOCALE_SOURCE "${OGS_EMBEDDED_LOCALE_DIR}/embedded_locales_data.cpp")
+set(OGS_EMBEDDED_LOCALE_DEPENDS "")
 
 if(OGS_I18N_PO_FILES)
     if(MSGFMT_EXECUTABLE)
@@ -204,6 +209,20 @@ if(OGS_I18N_PO_FILES)
         add_dependencies(${PROJECT_NAME} ogs_i18n_catalogs)
 
         list(REMOVE_DUPLICATES OGS_I18N_LOCALES)
+        list(SORT OGS_I18N_LOCALES)
+
+        if(OGS_I18N_LOCALES)
+            add_custom_command(
+                OUTPUT "${OGS_EMBEDDED_LOCALE_ZIP}"
+                COMMAND ${CMAKE_COMMAND} -E make_directory "${OGS_EMBEDDED_LOCALE_DIR}"
+                COMMAND ${CMAKE_COMMAND} -E tar cf "${OGS_EMBEDDED_LOCALE_ZIP}" --format=zip ${OGS_I18N_LOCALES}
+                WORKING_DIRECTORY "${OGS_I18N_LOCALE_OUTPUT_DIR}"
+                DEPENDS ${OGS_I18N_MO_FILES}
+                VERBATIM
+            )
+            list(APPEND OGS_EMBEDDED_LOCALE_DEPENDS "${OGS_EMBEDDED_LOCALE_ZIP}")
+        endif()
+
         foreach(LOCALE_NAME IN LISTS OGS_I18N_LOCALES)
             set(MO_FILE "${OGS_I18N_LOCALE_OUTPUT_DIR}/${LOCALE_NAME}/LC_MESSAGES/${OGS_I18N_DOMAIN}.mo")
 
@@ -224,6 +243,20 @@ if(OGS_I18N_PO_FILES)
         message(WARNING "Found i18n .po files but 'msgfmt' is not available. Catalog compilation is disabled.")
     endif()
 endif()
+
+add_custom_command(
+    OUTPUT "${OGS_EMBEDDED_LOCALE_SOURCE}"
+    COMMAND ${CMAKE_COMMAND}
+        -DINPUT_FILE=${OGS_EMBEDDED_LOCALE_ZIP}
+        -DOUTPUT_FILE=${OGS_EMBEDDED_LOCALE_SOURCE}
+        -DSYMBOL_NAME=gEmbeddedLocaleZip
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed_binary_to_cpp.cmake
+    DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/embed_binary_to_cpp.cmake"
+        ${OGS_EMBEDDED_LOCALE_DEPENDS}
+    VERBATIM
+)
+target_sources(${PROJECT_NAME} PRIVATE "${OGS_EMBEDDED_LOCALE_SOURCE}")
 
 # Install rules
 install(TARGETS ${PROJECT_NAME}

@@ -1,6 +1,7 @@
 #include "settings_dialog.h"
 
 #include "app.h"
+#include "embedded_locales.h"
 
 #include <wx/button.h>
 #include <wx/choice.h>
@@ -71,6 +72,12 @@ SettingsDialog::SettingsDialog(wxWindow *parent, GothicVersion initialVersion,
     const wxString shareDir =
         wxFileName(installPrefix.GetPath(), wxT("share")).GetFullPath();
     lookupPaths.Add(wxFileName(shareDir, wxT("locale")).GetFullPath());
+  }
+
+  wxString bundledLocaleError;
+  const wxString bundledLocaleRoot = GetBundledLocaleRoot(bundledLocaleError);
+  if (!bundledLocaleRoot.empty()) {
+    lookupPaths.Add(bundledLocaleRoot);
   }
 
   wxArrayString detectedCodes;
