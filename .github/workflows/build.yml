@@ -63,9 +63,7 @@ jobs:
 
     - name: Run clang-tidy
       run: |
-        clang-tidy -p build-tidy \
-          src/app.cpp src/runtime_paths.cpp src/pe_icon_loader.cpp \
-          --quiet
+        ./scripts/tidy.sh build-tidy
 
   linux:
     needs: [setup, format, tidy]
