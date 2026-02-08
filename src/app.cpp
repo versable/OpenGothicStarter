@@ -320,7 +320,9 @@ void MainPanel::Populate() {
       }
 
       imageList->Add(icon);
-      list_ctrl->InsertItem(i, games[i].title, i);
+      const long row = static_cast<long>(i);
+      const int imageIndex = static_cast<int>(i);
+      list_ctrl->InsertItem(row, games[i].title, imageIndex);
     }
 
     list_ctrl->AssignImageList(imageList, wxIMAGE_LIST_SMALL);
@@ -390,7 +392,7 @@ void MainPanel::SaveParams() {
 #if defined(_WIN32)
   config->Write(wxT("PARAMS/dx12"), check_dx12->GetValue());
 #endif
-  config->Write(wxT("PARAMS/FXAA"), (int)slide_fxaa->GetValue());
+  config->Write(wxT("PARAMS/FXAA"), static_cast<int>(slide_fxaa->GetValue()));
   config->Flush();
 }
 
@@ -454,7 +456,10 @@ bool MainPanel::BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
   }
 
   if (gameidx >= 0) {
-    command.Add(wxT("-game:") + games[gameidx].file);
+    const size_t selectedIndex = static_cast<size_t>(gameidx);
+    if (selectedIndex < games.size()) {
+      command.Add(wxT("-game:") + games[selectedIndex].file);
+    }
   }
 
   if (check_window->GetValue()) {
@@ -494,7 +499,10 @@ bool MainPanel::BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
 wxString MainPanel::ResolveWorkingDirectory(const RuntimePaths &paths,
                                             int gameidx) const {
   if (gameidx >= 0) {
-    return games[gameidx].datadir;
+    const size_t selectedIndex = static_cast<size_t>(gameidx);
+    if (selectedIndex < games.size()) {
+      return games[selectedIndex].datadir;
+    }
   }
   return GetDefaultWorkingDirectory(paths);
 }
