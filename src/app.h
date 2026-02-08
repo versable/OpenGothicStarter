@@ -31,7 +31,7 @@ private:
   void OnStart(wxListEvent &);
   void OnStart(wxCommandEvent &);
   void OnParams(wxCommandEvent &);
-  void OnFXAAScroll(wxScrollEvent &);
+  void OnFXAAScroll(wxCommandEvent &);
   void DoStart();
   void SaveParams();
   void LoadParams();

@@ -20,6 +20,7 @@
 #include <wx/stdpaths.h>
 
 const wxString APP_NAME = wxT("OpenGothicStarter");
+static constexpr int ID_SLIDER_FXAA = 2010;
 
 static long ExecuteAsyncCommand(const wxArrayString &command,
                                 const wxExecuteEnv &env) {
@@ -212,7 +213,7 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
 #if defined(_WIN32)
   EVT_CHECKBOX(2009, MainPanel::OnParams)
 #endif
-  EVT_SCROLL(MainPanel::OnFXAAScroll)
+  EVT_SLIDER(ID_SLIDER_FXAA, MainPanel::OnFXAAScroll)
 wxEND_EVENT_TABLE()
 // clang-format on
 
@@ -252,7 +253,7 @@ void MainPanel::InitWidgets() {
 
   field_fxaa = new wxStaticText(this, wxID_ANY, wxT("Anti-Aliasing:"));
   value_fxaa = new wxStaticText(this, wxID_ANY, wxT(""));
-  slide_fxaa = new wxSlider(this, wxID_ANY, 0, 0, 2);
+  slide_fxaa = new wxSlider(this, ID_SLIDER_FXAA, 0, 0, 2);
 
   wxBoxSizer *fxaa_sizer = new wxBoxSizer(wxHORIZONTAL);
   fxaa_sizer->Add(field_fxaa);
@@ -391,7 +392,7 @@ void MainPanel::SaveParams() {
 
 void MainPanel::OnParams(wxCommandEvent &) { SaveParams(); }
 
-void MainPanel::OnFXAAScroll(wxScrollEvent &) {
+void MainPanel::OnFXAAScroll(wxCommandEvent &) {
   int fxaa_value = slide_fxaa->GetValue();
   if (fxaa_value == 0) {
     value_fxaa->SetLabel(wxT("none"));
