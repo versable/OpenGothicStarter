@@ -126,7 +126,7 @@ jobs:
       run: brew install wxwidgets
 
     - name: Configure
-      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DOGS_WARNINGS_AS_ERRORS=ON
+      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON
 
     - name: Build
       run: cmake --build build --parallel
@@ -147,7 +147,7 @@ jobs:
       run: brew install wxwidgets
 
     - name: Configure
-      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DOGS_WARNINGS_AS_ERRORS=ON
+      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON
 
     - name: Build
       run: cmake --build build --parallel
