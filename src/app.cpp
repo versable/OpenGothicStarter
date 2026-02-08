@@ -23,6 +23,11 @@
 const wxString APP_NAME = wxT("OpenGothicStarter");
 namespace {
 constexpr int kSizerExpandAll = static_cast<int>(wxALL) | static_cast<int>(wxEXPAND);
+constexpr GothicVersion kSelectableGothicVersions[] = {
+    GothicVersion::Gothic1,
+    GothicVersion::Gothic2Classic,
+    GothicVersion::Gothic2Notr,
+};
 
 wxString ExpectedOpenGothicBinaryName() {
 #if defined(_WIN32)
@@ -30,6 +35,53 @@ wxString ExpectedOpenGothicBinaryName() {
 #else
   return wxT("Gothic2Notr");
 #endif
+}
+
+bool GothicVersionFromIndex(int index, GothicVersion &version) {
+  if (index < 0 ||
+      index >= static_cast<int>(std::size(kSelectableGothicVersions))) {
+    return false;
+  }
+
+  version = kSelectableGothicVersions[index];
+  return true;
+}
+
+bool GothicVersionToIndex(GothicVersion version, int &index) {
+  for (size_t i = 0; i < std::size(kSelectableGothicVersions); ++i) {
+    if (kSelectableGothicVersions[i] == version) {
+      index = static_cast<int>(i);
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool BuildGothicLaunchVersionArg(GothicVersion version, wxString &arg) {
+  switch (version) {
+  case GothicVersion::Gothic1:
+    arg = wxT("-g1");
+    return true;
+  case GothicVersion::Gothic2Classic:
+    arg = wxT("-g2c");
+    return true;
+  case GothicVersion::Gothic2Notr:
+    arg = wxT("-g2");
+    return true;
+  case GothicVersion::Unknown:
+  default:
+    arg.clear();
+    return false;
+  }
+}
+
+wxArrayString BuildGothicVersionChoices() {
+  wxArrayString choices;
+  choices.Add(_("Gothic 1"));
+  choices.Add(_("Gothic 2 Classic"));
+  choices.Add(_("Gothic 2 Night of the Raven"));
+  return choices;
 }
 } // namespace
 
@@ -148,11 +200,12 @@ static bool TryReadStoredGothicVersion(const RuntimePaths &paths,
     return false;
   }
 
-  if (value < 0 || value > 2) {
+  GothicVersion parsedVersion = GothicVersion::Unknown;
+  if (!GothicVersionFromIndex(static_cast<int>(value), parsedVersion)) {
     return false;
   }
 
-  version = static_cast<GothicVersion>(value);
+  version = parsedVersion;
   return true;
 }
 
@@ -178,15 +231,15 @@ static bool TryReadStoredLanguageOverride(const RuntimePaths &paths,
 
 static bool WriteStoredGothicVersion(const RuntimePaths &paths,
                                      GothicVersion version) {
-  const long rawVersion = static_cast<long>(version);
-  if (rawVersion < 0 || rawVersion > 2) {
+  int selection = -1;
+  if (!GothicVersionToIndex(version, selection)) {
     return false;
   }
 
   const wxString configPath = GetInstallConfigPath(paths);
   wxFileConfig cfg(wxEmptyString, wxEmptyString, configPath, wxEmptyString,
                    wxCONFIG_USE_LOCAL_FILE);
-  cfg.Write(wxT("GENERAL/gothicVersion"), rawVersion);
+  cfg.Write(wxT("GENERAL/gothicVersion"), static_cast<long>(selection));
   return cfg.Flush();
 }
 
@@ -474,23 +527,12 @@ bool MainPanel::BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
   OpenGothicStarterApp *app = RequireInvariant(
       dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
       wxT("wxTheApp must be an OpenGothicStarterApp instance."));
-  switch (app->gothic_version) {
-  case GothicVersion::Unknown:
-    error = _("Stored Gothic version is invalid. Please restart and select a valid version.");
-    return false;
-  case GothicVersion::Gothic1:
-    command.Add(wxT("-g1"));
-    break;
-  case GothicVersion::Gothic2Classic:
-    command.Add(wxT("-g2c"));
-    break;
-  case GothicVersion::Gothic2Notr:
-    command.Add(wxT("-g2"));
-    break;
-  default:
+  wxString versionArg;
+  if (!BuildGothicLaunchVersionArg(app->gothic_version, versionArg)) {
     error = _("Stored Gothic version is invalid. Please restart and select a valid version.");
     return false;
   }
+  command.Add(versionArg);
 
   if (gameidx >= 0) {
     const size_t selectedIndex = static_cast<size_t>(gameidx);
@@ -806,10 +848,7 @@ bool OpenGothicStarterApp::InitGothicVersion() {
   }
 
   const wxString configPath = GetInstallConfigPath(runtime_paths);
-  wxArrayString choices;
-  choices.Add(_("Gothic 1"));
-  choices.Add(_("Gothic 2 Classic"));
-  choices.Add(_("Gothic 2 Night of the Raven"));
+  const wxArrayString choices = BuildGothicVersionChoices();
 
   wxSingleChoiceDialog dialog(
       nullptr,
@@ -825,13 +864,13 @@ bool OpenGothicStarterApp::InitGothicVersion() {
     return false;
   }
 
-  const int selection = dialog.GetSelection();
-  if (selection < 0 || selection > 2) {
+  GothicVersion selectedVersion = GothicVersion::Unknown;
+  if (!GothicVersionFromIndex(dialog.GetSelection(), selectedVersion)) {
     wxMessageBox(_("Selected Gothic version is invalid."), _("Configuration Error"),
                  wxOK | wxICON_ERROR);
     return false;
   }
-  gothic_version = static_cast<GothicVersion>(selection);
+  gothic_version = selectedVersion;
 
   if (!WriteStoredGothicVersion(runtime_paths, gothic_version)) {
     wxLogWarning(wxT("Failed to persist selected Gothic version to %s"), configPath);
