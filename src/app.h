@@ -84,7 +84,6 @@ public:
 
 private:
   bool InitConfig();
-  void InitLocalization();
   bool InitGothicVersion();
 
   std::unique_ptr<wxLocale> app_locale;

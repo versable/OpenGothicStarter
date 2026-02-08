@@ -48,6 +48,7 @@ endif()
 # Source files
 set(SOURCES
     src/app.cpp
+    src/localization.cpp
     src/pe_icon_loader.cpp
     src/runtime_paths.cpp
 )
