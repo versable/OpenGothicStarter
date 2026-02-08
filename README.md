@@ -18,7 +18,8 @@ engine reimplementation.
 
 - A Gothic installation (Steam or GOG) with a `Data/` and `system/` directory.
 - OpenGothic binary (`Gothic2Notr(.exe)`).
-- OpenGothicStarter binary (`OpenGothicStarter(.exe)`).
+- OpenGothicStarter release artifact for your platform:
+  https://github.com/versable/OpenGothicStarter/releases
 - Windows only: Microsoft Visual C++ Redistributable (x64):
   - Direct download: https://aka.ms/vc14/vc_redist.x64.exe
   - Official page:
@@ -26,18 +27,20 @@ engine reimplementation.
 
 ### Install Steps
 
-1. Locate your Gothic installation folder (`Data/` and `system/` must exist).
-2. Typical locations:
+1. Download the OpenGothicStarter release artifact for your platform from:
+   https://github.com/versable/OpenGothicStarter/releases
+2. Locate your Gothic installation folder (`Data/` and `system/` must exist).
+3. Typical locations:
    - Steam (Windows): `C:\Program Files (x86)\Steam\steamapps\common\Gothic II`
    - Steam (Linux/Proton): `<SteamLibrary>/steamapps/common/Gothic II`
    - GOG (Windows): `C:\GOG Games\Gothic 2 Gold`
-3. Download OpenGothic binaries:
+4. Download OpenGothic binaries:
    - Releases: https://github.com/Try/OpenGothic/releases
    - Latest AppVeyor builds: https://ci.appveyor.com/project/Try/opengothic/history?branch=master
-4. Copy binaries into your Gothic `system/` directory:
+5. Copy binaries into your Gothic `system/` directory:
    - `OpenGothicStarter(.exe)` from this project
    - `Gothic2Notr(.exe)` from OpenGothic
-5. Start `OpenGothicStarter` from the same `system/` directory.
+6. Start `OpenGothicStarter` from the same `system/` directory.
 
 ### macOS Data Extraction
 
