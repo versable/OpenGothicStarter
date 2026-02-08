@@ -5,7 +5,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: OpenGothicStarter 0.1.1\n"
+"Project-Id-Version: OpenGothicStarter 0.2.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-08 09:21+0100\n"
 "PO-Revision-Date: 2026-02-08 09:21+0100\n"
@@ -16,6 +16,9 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Always"
+msgstr "Immer"
 
 msgid "Anti-Aliasing:"
 msgstr "Anti-Aliasing:"
@@ -45,12 +48,25 @@ msgstr ""
 msgid "Configuration Error"
 msgstr "Konfigurationsfehler"
 
+msgid "Contextual"
+msgstr "Situativ"
+
+msgid "FPS limit:"
+msgstr "FPS-Limit:"
+
 #, c-format
 msgid ""
 "Failed to save Gothic version to:\n"
 "%s"
 msgstr ""
 "Die Gothic-Version konnte nicht gespeichert werden unter:\n"
+"%s"
+
+#, c-format
+msgid ""
+"Failed to save SystemPack settings to:\n"
+"%s"
+msgstr "Die SystemPack-Einstellungen konnten nicht gespeichert werden unter:\n"
 "%s"
 
 #, c-format
@@ -66,6 +82,9 @@ msgstr "OpenGothic-Prozess konnte nicht gestartet werden."
 
 msgid "Force DirectX 12"
 msgstr "DirectX 12 erzwingen"
+
+msgid "General"
+msgstr "Allgemein"
 
 msgid "Global illumination"
 msgstr "Globale Beleuchtung"
@@ -89,8 +108,17 @@ msgstr ""
 msgid "Gothic version:"
 msgstr "Gothic-Version:"
 
+msgid "Hide focus highlight:"
+msgstr "Fokusmarkierung ausblenden:"
+
+msgid "Interface scale:"
+msgstr "UI-Skalierung:"
+
 msgid "Invalid Launcher Location"
 msgstr "Ungültiges Launcher-Verzeichnis"
+
+msgid "Inventory cell size:"
+msgstr "Inventarfeldgröße:"
 
 msgid "Language:"
 msgstr "Sprache:"
@@ -103,6 +131,15 @@ msgstr "Marvin-Modus"
 
 msgid "Meshlets"
 msgstr "Meshlets"
+
+msgid "Never"
+msgstr "Nie"
+
+msgid "New chapter height:"
+msgstr "Höhe des Kapitelbildes:"
+
+msgid "New chapter width:"
+msgstr "Breite des Kapitelbildes:"
 
 msgid "OpenGothic Not Found"
 msgstr "OpenGothic nicht gefunden"
@@ -146,6 +183,12 @@ msgstr ""
 msgid "Ray tracing"
 msgstr "Raytracing"
 
+msgid "Save image height:"
+msgstr "Höhe des Speicherbildes:"
+
+msgid "Save image width:"
+msgstr "Breite des Speicherbildes:"
+
 msgid "Select Gothic Version"
 msgstr "Gothic-Version auswählen"
 
@@ -155,13 +198,17 @@ msgstr "Die gewählte Gothic-Version ist ungültig."
 msgid "Settings"
 msgstr "Einstellungen"
 
-msgid "Settings saved."
-msgstr "Einstellungen gespeichert."
+msgid "Show FPS counter:"
+msgstr "FPS-Zähler anzeigen:"
 
-msgid "Settings saved. Restart the launcher to apply language changes."
-msgstr ""
-"Einstellungen gespeichert. Bitte starten Sie den Launcher neu, um die "
-"Sprachänderung anzuwenden."
+msgid "Show health bar:"
+msgstr "Lebensleiste anzeigen:"
+
+msgid "Show mana bar:"
+msgstr "Manaleiste anzeigen:"
+
+msgid "Show swim bar:"
+msgstr "Atemleiste anzeigen:"
 
 msgid "Start Game"
 msgstr "Spiel starten"
@@ -178,14 +225,28 @@ msgstr ""
 msgid "System default"
 msgstr "Systemstandard"
 
+msgid "SystemPack"
+msgstr "SystemPack"
+
+msgid "Vertical FOV:"
+msgstr "Vertikales FOV:"
+
 msgid "Virtual Shadowmap"
-msgstr "Virtuelle Shadowmap"
+msgstr "Virtuelle Shadow-Map"
 
 msgid "Window mode"
 msgstr "Fenstermodus"
 
 msgid "none"
 msgstr "keine"
+
+#~ msgid "Settings saved."
+#~ msgstr "Einstellungen gespeichert."
+
+#~ msgid "Settings saved. Restart the launcher to apply language changes."
+#~ msgstr ""
+#~ "Einstellungen gespeichert. Bitte starten Sie den Launcher neu, um die "
+#~ "Sprachänderung anzuwenden."
 
 #, c-format
 #~ msgid ""

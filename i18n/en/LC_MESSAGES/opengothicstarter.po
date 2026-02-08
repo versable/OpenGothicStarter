@@ -12,6 +12,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Always"
+msgstr ""
+
 msgid "Anti-Aliasing:"
 msgstr ""
 
@@ -32,9 +35,21 @@ msgstr ""
 msgid "Configuration Error"
 msgstr ""
 
+msgid "Contextual"
+msgstr ""
+
+msgid "FPS limit:"
+msgstr ""
+
 #, c-format
 msgid ""
 "Failed to save Gothic version to:\n"
+"%s"
+msgstr ""
+
+#, c-format
+msgid ""
+"Failed to save SystemPack settings to:\n"
 "%s"
 msgstr ""
 
@@ -48,6 +63,9 @@ msgid "Failed to start OpenGothic process."
 msgstr ""
 
 msgid "Force DirectX 12"
+msgstr ""
+
+msgid "General"
 msgstr ""
 
 msgid "Global illumination"
@@ -70,7 +88,16 @@ msgstr ""
 msgid "Gothic version:"
 msgstr ""
 
+msgid "Hide focus highlight:"
+msgstr ""
+
+msgid "Interface scale:"
+msgstr ""
+
 msgid "Invalid Launcher Location"
+msgstr ""
+
+msgid "Inventory cell size:"
 msgstr ""
 
 msgid "Language:"
@@ -83,6 +110,15 @@ msgid "Marvin mode"
 msgstr ""
 
 msgid "Meshlets"
+msgstr ""
+
+msgid "Never"
+msgstr ""
+
+msgid "New chapter height:"
+msgstr ""
+
+msgid "New chapter width:"
 msgstr ""
 
 msgid "OpenGothic Not Found"
@@ -113,6 +149,12 @@ msgstr ""
 msgid "Ray tracing"
 msgstr ""
 
+msgid "Save image height:"
+msgstr ""
+
+msgid "Save image width:"
+msgstr ""
+
 msgid "Select Gothic Version"
 msgstr ""
 
@@ -122,10 +164,16 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-msgid "Settings saved."
+msgid "Show FPS counter:"
 msgstr ""
 
-msgid "Settings saved. Restart the launcher to apply language changes."
+msgid "Show health bar:"
+msgstr ""
+
+msgid "Show mana bar:"
+msgstr ""
+
+msgid "Show swim bar:"
 msgstr ""
 
 msgid "Start Game"
@@ -139,6 +187,12 @@ msgid ""
 msgstr ""
 
 msgid "System default"
+msgstr ""
+
+msgid "SystemPack"
+msgstr ""
+
+msgid "Vertical FOV:"
 msgstr ""
 
 msgid "Virtual Shadowmap"
