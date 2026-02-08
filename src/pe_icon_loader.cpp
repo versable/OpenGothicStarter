@@ -5,7 +5,6 @@
 #include <vector>
 #include <wx/bitmap.h>
 #include <wx/icon.h>
-#include <wx/log.h>
 #include <wx/mstream.h>
 
 #if defined(OGS_HAVE_PE_PARSE) && !defined(_WIN32)

@@ -18,10 +18,8 @@
 #include <wx/process.h>
 #include <wx/slider.h>
 #include <wx/stdpaths.h>
-#include <wx/textfile.h>
 
 const wxString APP_NAME = wxT("OpenGothicStarter");
-const wxString APP_VERSION = wxT("0.0.1");
 
 static long ExecuteAsyncCommand(const wxArrayString &command,
                                 const wxExecuteEnv &env) {
@@ -542,9 +540,6 @@ std::vector<GameEntry> MainPanel::InitGames() {
   }
 
   wxString systemDir = paths->system_dir;
-  if (!wxDir::Exists(systemDir))
-    return gamesList;
-
   wxDir dir(systemDir);
   wxString iniName;
   bool hasFile = dir.GetFirst(&iniName, wxEmptyString, wxDIR_FILES);

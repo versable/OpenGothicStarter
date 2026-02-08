@@ -7,7 +7,6 @@
 #include <wx/wx.h>
 
 extern const wxString APP_NAME;
-extern const wxString APP_VERSION;
 
 struct GameEntry {
   wxString file;
