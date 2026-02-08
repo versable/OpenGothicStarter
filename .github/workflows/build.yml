@@ -39,8 +39,38 @@ jobs:
     - name: Verify formatting
       run: git diff --exit-code
 
+  tidy:
+    needs: [format]
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libwxgtk3.2-dev clang clang-tidy
+
+    - name: Configure
+      env:
+        CC: clang
+        CXX: clang++
+      run: |
+        cmake -S . -B build-tidy \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          -DOGS_WARNINGS_AS_ERRORS=ON \
+          -DOGS_EXTRA_WARNINGS=ON
+
+    - name: Run clang-tidy
+      run: |
+        clang-tidy -p build-tidy \
+          src/app.cpp src/runtime_paths.cpp src/pe_icon_loader.cpp \
+          --checks='-*,clang-analyzer-*,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-analyzer-optin.cplusplus.VirtualCall' \
+          --warnings-as-errors='*' \
+          --quiet
+
   linux:
-    needs: [setup, format]
+    needs: [setup, format, tidy]
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
@@ -71,7 +101,7 @@ jobs:
         path: build/OpenGothicStarter
 
   windows:
-    needs: [setup, format]
+    needs: [setup, format, tidy]
     runs-on: windows-2025
     steps:
     - uses: actions/checkout@v4
@@ -125,7 +155,7 @@ jobs:
         path: build/${{ env.BUILD_TYPE }}/OpenGothicStarter.exe
 
   macos-arm64:
-    needs: [setup, format]
+    needs: [setup, format, tidy]
     runs-on: macos-15
     steps:
     - uses: actions/checkout@v4
@@ -146,7 +176,7 @@ jobs:
         path: build/OpenGothicStarter
 
   macos-x64:
-    needs: [setup, format]
+    needs: [setup, format, tidy]
     runs-on: macos-15-intel
     steps:
     - uses: actions/checkout@v4
@@ -168,7 +198,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: [setup, linux, windows, macos-arm64, macos-x64]
+    needs: [setup, tidy, linux, windows, macos-arm64, macos-x64]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
