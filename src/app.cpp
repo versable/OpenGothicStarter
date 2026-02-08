@@ -30,13 +30,13 @@ static long ExecuteAsyncCommand(const wxArrayString &command,
   argvStorage.reserve(command.GetCount());
 
   for (const wxString &arg : command) {
-    wxCharBuffer utf8 = arg.utf8_str();
-    if (!utf8) {
+    const std::string utf8 = arg.ToStdString(wxConvUTF8);
+    if (!arg.empty() && utf8.empty()) {
       wxLogError(wxT("Failed to encode command argument for process launch."));
       return 0;
     }
 
-    argvStorage.emplace_back(utf8.data());
+    argvStorage.push_back(utf8);
   }
 
   std::vector<const char *> argv;
