@@ -156,6 +156,26 @@ static bool TryReadStoredGothicVersion(const RuntimePaths &paths,
   return true;
 }
 
+static bool TryReadStoredLanguageOverride(const RuntimePaths &paths,
+                                          wxString &language) {
+  language.clear();
+
+  const wxString configPath = GetInstallConfigPath(paths);
+  if (!wxFileName::FileExists(configPath)) {
+    return false;
+  }
+
+  wxFileConfig cfg(wxEmptyString, wxEmptyString, configPath, wxEmptyString,
+                   wxCONFIG_USE_LOCAL_FILE);
+  if (!cfg.Read(wxT("GENERAL/language"), &language)) {
+    return false;
+  }
+
+  language.Trim(true);
+  language.Trim(false);
+  return !language.empty();
+}
+
 static bool WriteStoredGothicVersion(const RuntimePaths &paths,
                                      GothicVersion version) {
   const long rawVersion = static_cast<long>(version);
@@ -704,6 +724,12 @@ bool OpenGothicStarterApp::OnInit() {
 
   runtime_paths = detectedPaths;
   runtime_paths_resolved = true;
+
+  wxString languageOverride;
+  if (TryReadStoredLanguageOverride(runtime_paths, languageOverride)) {
+    wxLogMessage(wxT("Using stored language override: %s"), languageOverride);
+    InitializeLocalization(app_locale, languageOverride);
+  }
 
   wxString validationError;
   if (!ValidateRuntimePaths(runtime_paths, validationError)) {

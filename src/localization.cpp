@@ -9,6 +9,7 @@
 namespace {
 
 const wxString kI18nDomain = wxT("opengothicstarter");
+bool gLocalizationLookupPathsRegistered = false;
 
 void AddCatalogLookupPathIfExists(const wxString &path) {
   if (!wxDir::Exists(path)) {
@@ -40,25 +41,57 @@ wxArrayString BuildLocalizationLookupPaths() {
   return paths;
 }
 
-} // namespace
+void RegisterLocalizationLookupPaths() {
+  if (gLocalizationLookupPathsRegistered) {
+    return;
+  }
 
-void InitializeLocalization(std::unique_ptr<wxLocale> &app_locale) {
   const wxArrayString lookupPaths = BuildLocalizationLookupPaths();
   for (const wxString &path : lookupPaths) {
     AddCatalogLookupPathIfExists(path);
+  }
+  gLocalizationLookupPathsRegistered = true;
+}
+
+bool InitLocale(wxLocale &locale, int language) {
+  if (language == wxLANGUAGE_UNKNOWN) {
+    return false;
+  }
+  return locale.Init(language, wxLOCALE_DONT_LOAD_DEFAULT);
+}
+
+} // namespace
+
+void InitializeLocalization(std::unique_ptr<wxLocale> &app_locale,
+                            const wxString &languageOverride) {
+  RegisterLocalizationLookupPaths();
+
+  int requestedLanguage = wxLANGUAGE_UNKNOWN;
+  bool hasOverride = false;
+  if (!languageOverride.empty()) {
+    const wxLanguageInfo *langInfo = wxLocale::FindLanguageInfo(languageOverride);
+    if (langInfo != nullptr) {
+      hasOverride = true;
+      requestedLanguage = langInfo->Language;
+    } else {
+      wxLogWarning(wxT("Invalid language override '%s'. Falling back to system locale."),
+                   languageOverride);
+    }
   }
 
   const int systemLanguage = wxLocale::GetSystemLanguage();
   app_locale = std::make_unique<wxLocale>();
 
-  if (systemLanguage != wxLANGUAGE_UNKNOWN &&
-      app_locale->Init(systemLanguage, wxLOCALE_DONT_LOAD_DEFAULT)) {
+  if (hasOverride && InitLocale(*app_locale, requestedLanguage)) {
+    wxLogMessage(wxT("Initialized language override: %s"),
+                 wxLocale::GetLanguageName(requestedLanguage));
+  } else if (InitLocale(*app_locale, systemLanguage)) {
     wxLogMessage(wxT("Initialized system locale: %s"),
                  wxLocale::GetLanguageName(systemLanguage));
   } else {
-    wxLogWarning(wxT("Failed to initialize system locale; falling back to English."));
+    wxLogWarning(wxT("Failed to initialize requested/system locale; falling back to English."));
     app_locale = std::make_unique<wxLocale>();
-    if (!app_locale->Init(wxLANGUAGE_ENGLISH, wxLOCALE_DONT_LOAD_DEFAULT)) {
+    if (!InitLocale(*app_locale, wxLANGUAGE_ENGLISH)) {
       wxLogWarning(
           wxT("Failed to initialize English locale. Continuing without catalog localization."));
       app_locale.reset();
