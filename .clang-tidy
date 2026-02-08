@@ -1,0 +1,10 @@
+---
+Checks: >
+  -*,
+  clang-analyzer-*,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-optin.cplusplus.VirtualCall
+WarningsAsErrors: '*'
+HeaderFilterRegex: '^src/.*'
+FormatStyle: none
+...
