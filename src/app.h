@@ -26,20 +26,6 @@ struct GameEntry {
   wxString datadir;
 };
 
-class SettingsDialog : public wxDialog {
-public:
-  SettingsDialog(wxWindow *parent, GothicVersion initialVersion,
-                 const wxString &initialLanguage);
-
-  GothicVersion GetSelectedVersion() const;
-  wxString GetLanguageOverride() const;
-
-private:
-  wxChoice *version_choice;
-  wxChoice *language_choice;
-  std::vector<wxString> language_codes;
-};
-
 class MainPanel : public wxPanel {
 public:
   MainPanel(wxWindow *parent);

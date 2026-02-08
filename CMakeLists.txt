@@ -51,6 +51,7 @@ set(SOURCES
     src/localization.cpp
     src/pe_icon_loader.cpp
     src/runtime_paths.cpp
+    src/settings_dialog.cpp
 )
 
 # Create executable - Use WIN32 flag for Windows GUI apps
