@@ -22,7 +22,15 @@
 const wxString APP_NAME = wxT("OpenGothicStarter");
 namespace {
 constexpr int kSizerExpandAll = static_cast<int>(wxALL) | static_cast<int>(wxEXPAND);
+
+wxString ExpectedOpenGothicBinaryName() {
+#if defined(_WIN32)
+  return wxT("Gothic2Notr.exe");
+#else
+  return wxT("Gothic2Notr");
+#endif
 }
+} // namespace
 
 static long ExecuteAsyncCommand(const wxArrayString &command,
                                 const wxExecuteEnv &env) {
@@ -538,11 +546,19 @@ void MainPanel::DoStart() {
     return;
   }
   if (!ValidateRuntimePaths(*paths, pathError)) {
+    wxLogWarning(wxT("Runtime path validation failed before launch: %s"), pathError);
+    const wxString expectedLauncher =
+        wxFileName(paths->system_dir, wxFileName(paths->launcher_executable).GetFullName())
+            .GetFullPath();
+    const wxString expectedOpenGothic =
+        wxFileName(paths->system_dir, ExpectedOpenGothicBinaryName()).GetFullPath();
     wxMessageBox(wxString::Format(
-                     wxT("Invalid runtime layout.\n"
-                         "Expected launcher in Gothic/system and OpenGothic executable in system.\n"
-                         "Details: %s"),
-                     pathError),
+                     wxT("Cannot start game because the Gothic runtime layout is invalid.\n\n"
+                         "Expected files in the same directory:\n"
+                         "- %s\n"
+                         "- %s\n\n"
+                         "Fix the installation layout and try again."),
+                     expectedLauncher, expectedOpenGothic),
                  wxT("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
@@ -675,13 +691,11 @@ bool OpenGothicStarterApp::OnInit() {
   if (!ResolveRuntimePaths(detectedPaths, resolveError)) {
     wxLogWarning(wxT("Runtime path resolution failed: %s"), resolveError);
     wxMessageBox(wxString::Format(
-                     wxT("OpenGothicStarter must be started from your Gothic "
-                         "'system' directory.\n\n"
-                         "Current location:\n%s\n\n"
-                         "Expected layout:\n"
-                         "<Gothic>/system/OpenGothicStarter\n"
-                         "<Gothic>/system/Gothic2Notr"),
-                     wxStandardPaths::Get().GetExecutablePath()),
+                     wxT("OpenGothicStarter must be started from '<Gothic>/system'.\n\n"
+                         "Current executable path:\n%s\n\n"
+                         "Expected companion binary in that directory:\n%s"),
+                     wxStandardPaths::Get().GetExecutablePath(),
+                     ExpectedOpenGothicBinaryName()),
                  wxT("Invalid Launcher Location"), wxOK | wxICON_ERROR);
     return false;
   }
@@ -692,13 +706,13 @@ bool OpenGothicStarterApp::OnInit() {
   wxString validationError;
   if (!ValidateRuntimePaths(runtime_paths, validationError)) {
     wxLogWarning(wxT("Runtime path validation failed: %s"), validationError);
+    const wxString expectedOpenGothic =
+        wxFileName(runtime_paths.system_dir, ExpectedOpenGothicBinaryName()).GetFullPath();
     wxMessageBox(wxString::Format(
-                     wxT("OpenGothic executable was not found in the Gothic "
-                         "'system' directory.\n\n"
+                     wxT("OpenGothic binary was not found.\n\n"
                          "Checked directory:\n%s\n\n"
-                         "Expected executable names:\n"
-                         "- Gothic2Notr"),
-                     runtime_paths.system_dir),
+                         "Expected file:\n%s"),
+                     runtime_paths.system_dir, expectedOpenGothic),
                  wxT("OpenGothic Not Found"), wxOK | wxICON_ERROR);
     return false;
   }
