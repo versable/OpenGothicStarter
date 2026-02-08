@@ -20,8 +20,8 @@ jobs:
     steps:
     - id: version
       run: |
-        echo "version=OpenGothicStarter v0.0.1" >> "$GITHUB_OUTPUT"
-        echo "semver=0.0.1" >> "$GITHUB_OUTPUT"
+        echo "version=OpenGothicStarter v0.1.0" >> "$GITHUB_OUTPUT"
+        echo "semver=0.1.0" >> "$GITHUB_OUTPUT"
 
   format:
     runs-on: ubuntu-24.04
