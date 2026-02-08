@@ -40,8 +40,6 @@ engine reimplementation.
 5. Copy binaries into your Gothic `system/` directory:
    - `OpenGothicStarter(.exe)` from this project
    - `Gothic2Notr(.exe)` from OpenGothic
-   - Translations are bundled in `OpenGothicStarter`; no separate `locale/`
-     folder is required.
 6. Start `OpenGothicStarter` from the same `system/` directory.
 
 ### macOS Data Extraction
@@ -60,15 +58,7 @@ Place extracted game data where OpenGothic expects it, commonly under:
 - If detection fails, launcher asks you to choose Gothic version once and stores it
   in the same file.
 - Language selection uses system locale by default.
-- Optional install-level override in `system/OpenGothicStarter.ini`:
-
-```ini
-[GENERAL]
-language=de
-```
-
-Use `language[_REGION]` codes (ISO 639 language + optional ISO 3166 region),
-for example: `de`, `en`, `en_US`.
+- Language can be changed from the Settings dialog.
 
 ### Mods
 
@@ -87,12 +77,16 @@ for example: `de`, `en`, `en_US`.
 
 ### Build Requirements
 
-- [OpenGothic](https://github.com/Try/OpenGothic) engine
-- Original Gothic game files
 - CMake 3.16 or higher
 - C++17 compatible compiler
 - wxWidgets
 - gettext tools (`msgfmt`, `xgettext`, `msgcat`) for localization checks
+
+### Runtime Requirements (for local testing)
+
+- [OpenGothic](https://github.com/Try/OpenGothic) engine binary
+  (`Gothic2Notr(.exe)`)
+- Original Gothic game files (`Data/` and `system/`)
 
 ### Platform Dependencies
 
