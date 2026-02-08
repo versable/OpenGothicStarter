@@ -28,18 +28,14 @@ class MainPanel : public wxPanel {
 public:
   MainPanel(wxWindow *parent);
   void Populate();
-  void OnOrigin(wxCommandEvent &);
-  void DoOrigin();
 
 private:
   void InitWidgets();
   void OnSize(wxSizeEvent &event);
   void OnSelected(wxListEvent &);
-  void OnStart(wxListEvent &);
-  void OnStart(wxCommandEvent &);
-  void OnParams(wxCommandEvent &);
   void OnFXAAScroll(wxCommandEvent &);
   void DoStart();
+  void DoOrigin();
   bool BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
                           wxArrayString &command, wxString &error) const;
   wxString ResolveWorkingDirectory(const RuntimePaths &paths, int gameidx) const;
@@ -67,8 +63,6 @@ private:
   wxSlider *slide_fxaa;
 
   std::vector<GameEntry> games;
-
-  wxDECLARE_EVENT_TABLE();
 };
 
 class MainFrame : public wxFrame {

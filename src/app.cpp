@@ -20,21 +20,6 @@
 #include <wx/stdpaths.h>
 
 const wxString APP_NAME = wxT("OpenGothicStarter");
-namespace {
-constexpr int ID_BUTTON_START = 1001;
-constexpr int ID_CHECK_ORIGINAL = 2001;
-constexpr int ID_CHECK_WINDOW = 2002;
-constexpr int ID_CHECK_MARVIN = 2003;
-constexpr int ID_CHECK_RT = 2004;
-constexpr int ID_CHECK_GI = 2005;
-constexpr int ID_CHECK_MESHLETS = 2006;
-constexpr int ID_CHECK_VSM = 2007;
-constexpr int ID_CHECK_BENCHMARK = 2008;
-#if defined(_WIN32)
-constexpr int ID_CHECK_DX12 = 2009;
-#endif
-constexpr int ID_SLIDER_FXAA = 2010;
-} // namespace
 
 static long ExecuteAsyncCommand(const wxArrayString &command,
                                 const wxExecuteEnv &env) {
@@ -212,28 +197,6 @@ static wxString GothicVersionLabel(GothicVersion version) {
   }
 }
 
-// clang-format off
-wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
-  EVT_SIZE(MainPanel::OnSize)
-  EVT_LIST_ITEM_SELECTED(wxID_ANY, MainPanel::OnSelected)
-  EVT_LIST_ITEM_DESELECTED(wxID_ANY, MainPanel::OnSelected)
-  EVT_LIST_ITEM_ACTIVATED(wxID_ANY, MainPanel::OnStart)
-  EVT_BUTTON(ID_BUTTON_START, MainPanel::OnStart)
-  EVT_CHECKBOX(ID_CHECK_ORIGINAL, MainPanel::OnOrigin)
-  EVT_CHECKBOX(ID_CHECK_WINDOW, MainPanel::OnParams)
-  EVT_CHECKBOX(ID_CHECK_MARVIN, MainPanel::OnParams)
-  EVT_CHECKBOX(ID_CHECK_RT, MainPanel::OnParams)
-  EVT_CHECKBOX(ID_CHECK_GI, MainPanel::OnParams)
-  EVT_CHECKBOX(ID_CHECK_MESHLETS, MainPanel::OnParams)
-  EVT_CHECKBOX(ID_CHECK_VSM, MainPanel::OnParams)
-  EVT_CHECKBOX(ID_CHECK_BENCHMARK, MainPanel::OnParams)
-#if defined(_WIN32)
-  EVT_CHECKBOX(ID_CHECK_DX12, MainPanel::OnParams)
-#endif
-  EVT_SLIDER(ID_SLIDER_FXAA, MainPanel::OnFXAAScroll)
-wxEND_EVENT_TABLE()
-// clang-format on
-
 MainPanel::MainPanel(wxWindow *parent) : wxPanel(parent) {
   InitWidgets();
   Populate();
@@ -250,27 +213,27 @@ void MainPanel::InitWidgets() {
   wxBoxSizer *side_sizer = new wxBoxSizer(wxVERTICAL);
   side_sizer->SetMinSize(wxSize(200, -1));
 
-  button_start = new wxButton(this, ID_BUTTON_START, wxT("Start Game"));
+  button_start = new wxButton(this, wxID_ANY, wxT("Start Game"));
   button_start->Enable(false);
 
   side_sizer->AddSpacer(5);
   side_sizer->Add(button_start, 0, wxALL | wxEXPAND);
 
-  check_orig = new wxCheckBox(this, ID_CHECK_ORIGINAL, wxT("Start game without mods"));
-  check_window = new wxCheckBox(this, ID_CHECK_WINDOW, wxT("Window mode"));
-  check_marvin = new wxCheckBox(this, ID_CHECK_MARVIN, wxT("Marvin mode"));
+  check_orig = new wxCheckBox(this, wxID_ANY, wxT("Start game without mods"));
+  check_window = new wxCheckBox(this, wxID_ANY, wxT("Window mode"));
+  check_marvin = new wxCheckBox(this, wxID_ANY, wxT("Marvin mode"));
 #if defined(_WIN32)
-  check_dx12 = new wxCheckBox(this, ID_CHECK_DX12, wxT("Force DirectX 12"));
+  check_dx12 = new wxCheckBox(this, wxID_ANY, wxT("Force DirectX 12"));
 #endif
-  check_rt = new wxCheckBox(this, ID_CHECK_RT, wxT("Ray tracing"));
-  check_rti = new wxCheckBox(this, ID_CHECK_GI, wxT("Global illumination"));
-  check_meshlets = new wxCheckBox(this, ID_CHECK_MESHLETS, wxT("Meshlets"));
-  check_vsm = new wxCheckBox(this, ID_CHECK_VSM, wxT("Virtual Shadowmap"));
-  check_bench = new wxCheckBox(this, ID_CHECK_BENCHMARK, wxT("Benchmark"));
+  check_rt = new wxCheckBox(this, wxID_ANY, wxT("Ray tracing"));
+  check_rti = new wxCheckBox(this, wxID_ANY, wxT("Global illumination"));
+  check_meshlets = new wxCheckBox(this, wxID_ANY, wxT("Meshlets"));
+  check_vsm = new wxCheckBox(this, wxID_ANY, wxT("Virtual Shadowmap"));
+  check_bench = new wxCheckBox(this, wxID_ANY, wxT("Benchmark"));
 
   field_fxaa = new wxStaticText(this, wxID_ANY, wxT("Anti-Aliasing:"));
   value_fxaa = new wxStaticText(this, wxID_ANY, wxT(""));
-  slide_fxaa = new wxSlider(this, ID_SLIDER_FXAA, 0, 0, 2);
+  slide_fxaa = new wxSlider(this, wxID_ANY, 0, 0, 2);
 
   wxBoxSizer *fxaa_sizer = new wxBoxSizer(wxHORIZONTAL);
   fxaa_sizer->Add(field_fxaa);
@@ -295,6 +258,30 @@ void MainPanel::InitWidgets() {
 
   main_sizer->Add(side_sizer);
   SetSizer(main_sizer);
+
+  Bind(wxEVT_SIZE, &MainPanel::OnSize, this);
+  list_ctrl->Bind(wxEVT_LIST_ITEM_SELECTED, &MainPanel::OnSelected, this);
+  list_ctrl->Bind(wxEVT_LIST_ITEM_DESELECTED, &MainPanel::OnSelected, this);
+  list_ctrl->Bind(wxEVT_LIST_ITEM_ACTIVATED,
+                  [this](wxListEvent &) { DoStart(); });
+  button_start->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { DoStart(); });
+  check_orig->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent &) { DoOrigin(); });
+
+  auto bindParamToggle = [this](wxCheckBox *box) {
+    box->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent &) { SaveParams(); });
+  };
+
+  bindParamToggle(check_window);
+  bindParamToggle(check_marvin);
+  bindParamToggle(check_rt);
+  bindParamToggle(check_rti);
+  bindParamToggle(check_meshlets);
+  bindParamToggle(check_vsm);
+  bindParamToggle(check_bench);
+#if defined(_WIN32)
+  bindParamToggle(check_dx12);
+#endif
+  slide_fxaa->Bind(wxEVT_SLIDER, &MainPanel::OnFXAAScroll, this);
 }
 
 void MainPanel::Populate() {
@@ -407,8 +394,6 @@ void MainPanel::SaveParams() {
   config->Flush();
 }
 
-void MainPanel::OnParams(wxCommandEvent &) { SaveParams(); }
-
 void MainPanel::OnFXAAScroll(wxCommandEvent &) {
   int fxaa_value = slide_fxaa->GetValue();
   if (fxaa_value == 0) {
@@ -431,12 +416,6 @@ void MainPanel::DoOrigin() {
   }
   button_start->Enable(state);
 }
-
-void MainPanel::OnOrigin(wxCommandEvent &) { DoOrigin(); }
-
-void MainPanel::OnStart(wxListEvent &) { DoStart(); }
-
-void MainPanel::OnStart(wxCommandEvent &) { DoStart(); }
 
 int MainPanel::GetSelectedGameIndex() const {
   const long selected = list_ctrl->GetFirstSelected();
