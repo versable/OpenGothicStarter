@@ -184,7 +184,7 @@ bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
 
         if (r.type == peparse::RT_ICON) {
           if (r.name <= UINT16_MAX && extraction->icons.find(static_cast<uint16_t>(r.name)) ==
-                                         extraction->icons.end()) {
+                                          extraction->icons.end()) {
             extraction->icons.emplace(static_cast<uint16_t>(r.name), std::move(bytes));
           }
           return 0;
