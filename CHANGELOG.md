@@ -7,8 +7,11 @@ and this project adheres to Semantic Versioning.
 
 ## [0.2.2] - 2026-02-08
 
-- Bundled required vcpkg runtime DLLs in Windows release artifacts to avoid
-  missing wxWidgets runtime errors on end-user systems.
+- Bundled required runtime DLLs in Windows release artifacts to avoid missing
+  wxWidgets/runtime dependency errors on end-user systems.
+- Hardened Windows CI runtime bundling by resolving vcpkg runtime paths across
+  manifest/classic layouts and bundling only DLLs actually required by
+  `OpenGothicStarter.exe`.
 - Clarified runtime dependency requirements in `README.md` with a dedicated
   platform-specific section for Windows, Linux, and macOS.
 
