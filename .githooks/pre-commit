@@ -19,17 +19,5 @@ if [ "${#files[@]}" -gt 0 ]; then
 fi
 
 if [ "${#po_files[@]}" -gt 0 ]; then
-  if ! command -v msgfmt >/dev/null 2>&1; then
-    echo "msgfmt is required to validate staged localization catalogs." >&2
-    exit 1
-  fi
-
-  for po_file in "${po_files[@]}"; do
-    if ! output=$(msgfmt --check --check-format -o /dev/null "${po_file}" 2>&1); then
-      echo "${output}" >&2
-      exit 1
-    fi
-  done
-
-  echo "Validated staged localization catalogs with msgfmt."
+  ./scripts/check_i18n.sh "${po_files[@]}"
 fi
