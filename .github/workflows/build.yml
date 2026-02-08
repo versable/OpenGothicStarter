@@ -171,11 +171,18 @@ jobs:
       run: |
         cmake --build build --parallel
 
+    - name: Bundle runtime DLLs
+      shell: pwsh
+      run: |
+        Copy-Item "$env:VCPKG_ROOT\installed\x64-windows\bin\*.dll" -Destination build -Force
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: opengothicstarter_${{ needs.setup.outputs.semver }}_win_x64
-        path: build/OpenGothicStarter.exe
+        path: |
+          build/OpenGothicStarter.exe
+          build/*.dll
 
   macos-arm64:
     needs: [setup, format, tidy]
