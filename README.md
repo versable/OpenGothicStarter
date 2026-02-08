@@ -20,10 +20,17 @@ engine reimplementation.
 - OpenGothic binary (`Gothic2Notr(.exe)`).
 - OpenGothicStarter release artifact for your platform:
   https://github.com/versable/OpenGothicStarter/releases
-- Windows only: Microsoft Visual C++ Redistributable (x64):
+
+#### Platform Runtime Dependencies
+
+- Windows: Microsoft Visual C++ Redistributable (x64) if missing on your system:
   - Direct download: https://aka.ms/vc14/vc_redist.x64.exe
   - Official page:
     https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version
+- Linux (Debian/Ubuntu): wxWidgets GTK runtime (wxGTK 3.2), for example:
+  `sudo apt install libwxgtk3.2-1 || sudo apt install libwxgtk3.2-1t64`
+- macOS: wxWidgets runtime via Homebrew:
+  `brew install wxwidgets`
 
 ### Install Steps
 
