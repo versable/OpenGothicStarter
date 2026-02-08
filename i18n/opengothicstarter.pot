@@ -1,7 +1,12 @@
+# OpenGothicStarter translation template.
+# Copyright (C) 2026 OpenGothicStarter contributors
+# This file is distributed under the same license as the OpenGothicStarter package.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: OpenGothicStarter 0.1.0\n"
-"POT-Creation-Date: 2026-02-08 00:00+0000\n"
+"Project-Id-Version: OpenGothicStarter 0.1.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-08 09:21+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -9,3 +14,143 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: src/app.cpp:268
+msgid "Anti-Aliasing:"
+msgstr ""
+
+#: src/app.cpp:266
+msgid "Benchmark"
+msgstr ""
+
+#: src/app.cpp:577
+#, c-format
+msgid ""
+"Cannot start game because the Gothic runtime layout is invalid.\n"
+"\n"
+"Expected files in the same directory:\n"
+"- %s\n"
+"- %s\n"
+"\n"
+"Fix the installation layout and try again."
+msgstr ""
+
+#: src/app.cpp:566 src/app.cpp:583 src/app.cpp:591 src/app.cpp:599
+#: src/app.cpp:830
+msgid "Configuration Error"
+msgstr ""
+
+#: src/app.cpp:608
+msgid "Failed to start OpenGothic process."
+msgstr ""
+
+#: src/app.cpp:260
+msgid "Force DirectX 12"
+msgstr ""
+
+#: src/app.cpp:263
+msgid "Global illumination"
+msgstr ""
+
+#: src/app.cpp:810
+msgid "Gothic 1"
+msgstr ""
+
+#: src/app.cpp:811
+msgid "Gothic 2 Classic"
+msgstr ""
+
+#: src/app.cpp:812
+msgid "Gothic 2 Night of the Raven"
+msgstr ""
+
+#: src/app.cpp:817
+#, c-format
+msgid ""
+"Gothic version could not be detected automatically.\n"
+"Please choose the version for this installation.\n"
+"\n"
+"The selection will be saved in:\n"
+"%s"
+msgstr ""
+
+#: src/app.cpp:721
+msgid "Invalid Launcher Location"
+msgstr ""
+
+#: src/app.cpp:608
+msgid "Launch Failed"
+msgstr ""
+
+#: src/app.cpp:258
+msgid "Marvin mode"
+msgstr ""
+
+#: src/app.cpp:264
+msgid "Meshlets"
+msgstr ""
+
+#: src/app.cpp:744
+msgid "OpenGothic Not Found"
+msgstr ""
+
+#: src/app.cpp:740
+#, c-format
+msgid ""
+"OpenGothic binary was not found.\n"
+"\n"
+"Checked directory:\n"
+"%s\n"
+"\n"
+"Expected file:\n"
+"%s"
+msgstr ""
+
+#: src/app.cpp:716
+#, c-format
+msgid ""
+"OpenGothicStarter must be started from '<Gothic>/system'.\n"
+"\n"
+"Current executable path:\n"
+"%s\n"
+"\n"
+"Expected companion binary in that directory:\n"
+"%s"
+msgstr ""
+
+#: src/app.cpp:262
+msgid "Ray tracing"
+msgstr ""
+
+#: src/app.cpp:821
+msgid "Select Gothic Version"
+msgstr ""
+
+#: src/app.cpp:830
+msgid "Selected Gothic version is invalid."
+msgstr ""
+
+#: src/app.cpp:250
+msgid "Start Game"
+msgstr ""
+
+#: src/app.cpp:256
+msgid "Start game without mods"
+msgstr ""
+
+#: src/app.cpp:479 src/app.cpp:491
+msgid ""
+"Stored Gothic version is invalid. Please restart and select a valid version."
+msgstr ""
+
+#: src/app.cpp:265
+msgid "Virtual Shadowmap"
+msgstr ""
+
+#: src/app.cpp:257
+msgid "Window mode"
+msgstr ""
+
+#: src/app.cpp:410 src/app.cpp:436
+msgid "none"
+msgstr ""
