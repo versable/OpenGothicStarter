@@ -90,6 +90,7 @@ for example: `de`, `en`, `en_US`.
 - CMake 3.16 or higher
 - C++17 compatible compiler
 - wxWidgets
+- gettext tools (`msgfmt`, `xgettext`, `msgcat`) for localization checks
 
 ### Platform Dependencies
 
@@ -165,3 +166,9 @@ Enable repository-local hooks:
 ```bash
 git config --local core.hooksPath .githooks
 ```
+
+#### Localization Checks
+
+The i18n checks require gettext tools:
+- `msgfmt` (validate `.po` catalogs)
+- `xgettext` and `msgcat` (validate `.pot` sync against source strings)
