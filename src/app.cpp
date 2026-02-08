@@ -594,7 +594,7 @@ void MainPanel::DoSettings() {
   }
 
   SettingsDialog dialog(this, app->gothic_version, currentLanguage);
-  if (dialog.ShowModal() != wxID_OK) {
+  if (dialog.ShowModal() != wxID_SAVE) {
     return;
   }
 
