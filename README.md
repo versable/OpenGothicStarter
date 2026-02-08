@@ -49,6 +49,12 @@ engine reimplementation.
    - `Gothic2Notr(.exe)` from OpenGothic
 6. Start `OpenGothicStarter` from the same `system/` directory.
 
+### Windows First Launch
+
+- Current release binaries are not code-signed.
+- Windows may show a Microsoft Defender SmartScreen warning on first run.
+- To continue: click `More info` -> `Run anyway`.
+
 ### macOS Data Extraction
 
 If your Gothic data is from GOG installers, use the Offline Backup installer files
