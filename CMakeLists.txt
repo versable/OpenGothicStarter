@@ -79,6 +79,12 @@ if(OGS_STRICT_WARNINGS)
             /w14287
             /w14296
         )
+        if(OGS_EXTRA_WARNINGS)
+            target_compile_options(${PROJECT_NAME} PRIVATE
+                /w44061
+                /w44062
+            )
+        endif()
         if(OGS_WARNINGS_AS_ERRORS)
             target_compile_options(${PROJECT_NAME} PRIVATE /WX)
         endif()
