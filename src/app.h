@@ -2,7 +2,9 @@
 
 #include "runtime_paths.h"
 
+#include <memory>
 #include <vector>
+#include <wx/intl.h>
 #include <wx/listctrl.h>
 #include <wx/wx.h>
 
@@ -82,5 +84,8 @@ public:
 
 private:
   bool InitConfig();
+  void InitLocalization();
   bool InitGothicVersion();
+
+  std::unique_ptr<wxLocale> app_locale;
 };
