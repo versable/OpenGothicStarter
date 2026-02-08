@@ -174,7 +174,25 @@ jobs:
     - name: Bundle runtime DLLs
       shell: pwsh
       run: |
-        Copy-Item "$env:VCPKG_ROOT\installed\x64-windows\bin\*.dll" -Destination build -Force
+        $candidateBinDirs = @(
+          (Join-Path $env:GITHUB_WORKSPACE "build/vcpkg_installed/x64-windows/bin"),
+          (Join-Path $env:GITHUB_WORKSPACE "vcpkg_installed/x64-windows/bin"),
+          (Join-Path $env:VCPKG_ROOT "installed/x64-windows/bin")
+        )
+
+        $runtimeBinDir = $candidateBinDirs | Where-Object { Test-Path $_ } | Select-Object -First 1
+        if (-not $runtimeBinDir) {
+          Write-Error "Could not find vcpkg runtime DLL directory. Checked: $($candidateBinDirs -join ', ')"
+          exit 1
+        }
+
+        $runtimeDlls = Get-ChildItem -Path $runtimeBinDir -Filter *.dll -File
+        if (-not $runtimeDlls) {
+          Write-Error "No runtime DLLs found in '$runtimeBinDir'."
+          exit 1
+        }
+
+        Copy-Item $runtimeDlls.FullName -Destination build -Force
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
