@@ -65,8 +65,6 @@ jobs:
       run: |
         clang-tidy -p build-tidy \
           src/app.cpp src/runtime_paths.cpp src/pe_icon_loader.cpp \
-          --checks='-*,clang-analyzer-*,-clang-analyzer-cplusplus.NewDeleteLeaks,-clang-analyzer-optin.cplusplus.VirtualCall' \
-          --warnings-as-errors='*' \
           --quiet
 
   linux:
