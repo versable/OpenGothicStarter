@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on Common Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.1.1] - 2026-02-08
+
+- Improved startup and launch error messages with clearer, actionable paths.
+- Aligned runtime executable detection with documented binary naming
+  (`Gothic2Notr` / `Gothic2Notr.exe`).
+- Restructured `README.md` to prioritize user setup and runtime usage flow.
+- Strengthened CI quality gates with formatter checks, clang-tidy policy, strict
+  warnings, and hardened build profiles.
+- Improved Windows CI build performance and consistency with Ninja and pinned,
+  cached vcpkg dependencies.
+- Hardened release automation by deriving release SemVer from tag names and
+  enforcing complete draft release assets.
+
 ## [0.1.0] - 2026-02-08
 
 - Adopted a drop-in runtime model rooted at `Gothic/system` with saves in
@@ -20,5 +33,6 @@ and this project adheres to Semantic Versioning.
 
 _First release._
 
+[0.1.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.1.1
 [0.1.0]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.1.0
 [0.0.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.0.1
