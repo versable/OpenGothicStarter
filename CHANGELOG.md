@@ -7,8 +7,6 @@ and this project adheres to Semantic Versioning.
 
 ## [0.2.1] - 2026-02-08
 
-- Fixed `clang-tidy` CI failure in the settings dialog by using explicit sizer
-  flag casts for mixed wx flag enums.
 - Stopped shipping redundant `locale/` folders in release artifacts now that
   catalogs are embedded in the launcher binary.
 - Updated `README.md` to remove outdated manual language override guidance and
