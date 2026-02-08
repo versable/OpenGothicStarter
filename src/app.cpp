@@ -876,13 +876,15 @@ bool OpenGothicStarterApp::InitGothicVersion() {
   choices.Add(_("Gothic 2 Classic"));
   choices.Add(_("Gothic 2 Night of the Raven"));
 
+  constexpr long kVersionChoiceDialogStyle =
+      (wxCHOICEDLG_STYLE & ~wxOK) | wxAPPLY;
   wxSingleChoiceDialog dialog(
       nullptr,
       _("Gothic version could not be detected automatically.\n"
         "Please choose the version for this installation."),
-      _("Select Gothic Version"), choices);
+      _("Select Gothic Version"), choices, nullptr, kVersionChoiceDialogStyle);
   dialog.SetSelection(2);
-  if (dialog.ShowModal() != wxID_OK) {
+  if (dialog.ShowModal() != wxID_APPLY) {
     wxLogWarning(wxT("Gothic version selection was canceled by user."));
     return false;
   }
