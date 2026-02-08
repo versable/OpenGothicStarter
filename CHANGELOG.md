@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on Common Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.2.2] - 2026-02-08
+
+- Bundled required vcpkg runtime DLLs in Windows release artifacts to avoid
+  missing wxWidgets runtime errors on end-user systems.
+- Clarified runtime dependency requirements in `README.md` with a dedicated
+  platform-specific section for Windows, Linux, and macOS.
+
 ## [0.2.1] - 2026-02-08
 
 - Stopped shipping redundant `locale/` folders in release artifacts now that
@@ -55,6 +62,7 @@ and this project adheres to Semantic Versioning.
 
 _First release._
 
+[0.2.2]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.2
 [0.2.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.1
 [0.2.0]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.0
 [0.1.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.1.1
