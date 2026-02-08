@@ -3,6 +3,7 @@ Checks: >
   -*,
   clang-analyzer-*,
   bugprone-*,
+  performance-*,
   -clang-analyzer-cplusplus.NewDeleteLeaks,
   -clang-analyzer-optin.cplusplus.VirtualCall,
   -bugprone-easily-swappable-parameters
