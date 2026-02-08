@@ -227,25 +227,25 @@ void MainPanel::InitWidgets() {
   wxBoxSizer *side_sizer = new wxBoxSizer(wxVERTICAL);
   side_sizer->SetMinSize(wxSize(200, -1));
 
-  button_start = new wxButton(this, wxID_ANY, wxT("Start Game"));
+  button_start = new wxButton(this, wxID_ANY, _("Start Game"));
   button_start->Enable(false);
 
   side_sizer->AddSpacer(5);
   side_sizer->Add(button_start, 0, kSizerExpandAll);
 
-  check_orig = new wxCheckBox(this, wxID_ANY, wxT("Start game without mods"));
-  check_window = new wxCheckBox(this, wxID_ANY, wxT("Window mode"));
-  check_marvin = new wxCheckBox(this, wxID_ANY, wxT("Marvin mode"));
+  check_orig = new wxCheckBox(this, wxID_ANY, _("Start game without mods"));
+  check_window = new wxCheckBox(this, wxID_ANY, _("Window mode"));
+  check_marvin = new wxCheckBox(this, wxID_ANY, _("Marvin mode"));
 #if defined(_WIN32)
-  check_dx12 = new wxCheckBox(this, wxID_ANY, wxT("Force DirectX 12"));
+  check_dx12 = new wxCheckBox(this, wxID_ANY, _("Force DirectX 12"));
 #endif
-  check_rt = new wxCheckBox(this, wxID_ANY, wxT("Ray tracing"));
-  check_rti = new wxCheckBox(this, wxID_ANY, wxT("Global illumination"));
-  check_meshlets = new wxCheckBox(this, wxID_ANY, wxT("Meshlets"));
-  check_vsm = new wxCheckBox(this, wxID_ANY, wxT("Virtual Shadowmap"));
-  check_bench = new wxCheckBox(this, wxID_ANY, wxT("Benchmark"));
+  check_rt = new wxCheckBox(this, wxID_ANY, _("Ray tracing"));
+  check_rti = new wxCheckBox(this, wxID_ANY, _("Global illumination"));
+  check_meshlets = new wxCheckBox(this, wxID_ANY, _("Meshlets"));
+  check_vsm = new wxCheckBox(this, wxID_ANY, _("Virtual Shadowmap"));
+  check_bench = new wxCheckBox(this, wxID_ANY, _("Benchmark"));
 
-  field_fxaa = new wxStaticText(this, wxID_ANY, wxT("Anti-Aliasing:"));
+  field_fxaa = new wxStaticText(this, wxID_ANY, _("Anti-Aliasing:"));
   value_fxaa = new wxStaticText(this, wxID_ANY, wxT(""));
   slide_fxaa = new wxSlider(this, wxID_ANY, 0, 0, 2);
 
@@ -387,7 +387,7 @@ void MainPanel::LoadParams() {
   slide_fxaa->SetValue(fxaa);
 
   if (fxaa == 0) {
-    value_fxaa->SetLabel(wxT("none"));
+    value_fxaa->SetLabel(_("none"));
   } else {
     value_fxaa->SetLabel(wxString::Format(wxT("%d"), fxaa));
   }
@@ -413,7 +413,7 @@ void MainPanel::SaveParams() {
 void MainPanel::OnFXAAScroll(wxCommandEvent &) {
   int fxaa_value = slide_fxaa->GetValue();
   if (fxaa_value == 0) {
-    value_fxaa->SetLabel(wxT("none"));
+    value_fxaa->SetLabel(_("none"));
   } else {
     value_fxaa->SetLabel(wxString::Format(wxT("%d"), fxaa_value));
   }
@@ -456,7 +456,7 @@ bool MainPanel::BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
       wxT("wxTheApp must be an OpenGothicStarterApp instance."));
   switch (app->gothic_version) {
   case GothicVersion::Unknown:
-    error = wxT("Stored Gothic version is invalid. Please restart and select a valid version.");
+    error = _("Stored Gothic version is invalid. Please restart and select a valid version.");
     return false;
   case GothicVersion::Gothic1:
     command.Add(wxT("-g1"));
@@ -468,7 +468,7 @@ bool MainPanel::BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
     command.Add(wxT("-g2"));
     break;
   default:
-    error = wxT("Stored Gothic version is invalid. Please restart and select a valid version.");
+    error = _("Stored Gothic version is invalid. Please restart and select a valid version.");
     return false;
   }
 
@@ -543,7 +543,7 @@ void MainPanel::DoStart() {
   const RuntimePaths *paths = nullptr;
   wxString pathError;
   if (!GetResolvedRuntimePaths(paths, pathError)) {
-    wxMessageBox(pathError, wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    wxMessageBox(pathError, _("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
   if (!ValidateRuntimePaths(*paths, pathError)) {
@@ -554,13 +554,13 @@ void MainPanel::DoStart() {
     const wxString expectedOpenGothic =
         wxFileName(paths->system_dir, ExpectedOpenGothicBinaryName()).GetFullPath();
     wxMessageBox(wxString::Format(
-                     wxT("Cannot start game because the Gothic runtime layout is invalid.\n\n"
-                         "Expected files in the same directory:\n"
-                         "- %s\n"
-                         "- %s\n\n"
-                         "Fix the installation layout and try again."),
+                     _("Cannot start game because the Gothic runtime layout is invalid.\n\n"
+                       "Expected files in the same directory:\n"
+                       "- %s\n"
+                       "- %s\n\n"
+                       "Fix the installation layout and try again."),
                      expectedLauncher, expectedOpenGothic),
-                 wxT("Configuration Error"), wxOK | wxICON_ERROR);
+                 _("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
 
@@ -568,7 +568,7 @@ void MainPanel::DoStart() {
   wxArrayString command;
   wxString commandError;
   if (!BuildLaunchCommand(*paths, gameidx, command, commandError)) {
-    wxMessageBox(commandError, wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    wxMessageBox(commandError, _("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
 
@@ -576,7 +576,7 @@ void MainPanel::DoStart() {
   env.cwd = ResolveWorkingDirectory(*paths, gameidx);
   wxString directoryError;
   if (!EnsureWorkingDirectoryExists(env.cwd, directoryError)) {
-    wxMessageBox(directoryError, wxT("Configuration Error"), wxOK | wxICON_ERROR);
+    wxMessageBox(directoryError, _("Configuration Error"), wxOK | wxICON_ERROR);
     return;
   }
 
@@ -585,8 +585,8 @@ void MainPanel::DoStart() {
 
   const long pid = ExecuteAsyncCommand(command, env);
   if (pid == 0) {
-    wxMessageBox(wxT("Failed to start OpenGothic process."),
-                 wxT("Launch Failed"), wxOK | wxICON_ERROR);
+    wxMessageBox(_("Failed to start OpenGothic process."), _("Launch Failed"),
+                 wxOK | wxICON_ERROR);
     return;
   }
 }
@@ -693,12 +693,12 @@ bool OpenGothicStarterApp::OnInit() {
   if (!ResolveRuntimePaths(detectedPaths, resolveError)) {
     wxLogWarning(wxT("Runtime path resolution failed: %s"), resolveError);
     wxMessageBox(wxString::Format(
-                     wxT("OpenGothicStarter must be started from '<Gothic>/system'.\n\n"
-                         "Current executable path:\n%s\n\n"
-                         "Expected companion binary in that directory:\n%s"),
+                     _("OpenGothicStarter must be started from '<Gothic>/system'.\n\n"
+                       "Current executable path:\n%s\n\n"
+                       "Expected companion binary in that directory:\n%s"),
                      wxStandardPaths::Get().GetExecutablePath(),
                      ExpectedOpenGothicBinaryName()),
-                 wxT("Invalid Launcher Location"), wxOK | wxICON_ERROR);
+                 _("Invalid Launcher Location"), wxOK | wxICON_ERROR);
     return false;
   }
 
@@ -711,11 +711,11 @@ bool OpenGothicStarterApp::OnInit() {
     const wxString expectedOpenGothic =
         wxFileName(runtime_paths.system_dir, ExpectedOpenGothicBinaryName()).GetFullPath();
     wxMessageBox(wxString::Format(
-                     wxT("OpenGothic binary was not found.\n\n"
-                         "Checked directory:\n%s\n\n"
-                         "Expected file:\n%s"),
+                     _("OpenGothic binary was not found.\n\n"
+                       "Checked directory:\n%s\n\n"
+                       "Expected file:\n%s"),
                      runtime_paths.system_dir, expectedOpenGothic),
-                 wxT("OpenGothic Not Found"), wxOK | wxICON_ERROR);
+                 _("OpenGothic Not Found"), wxOK | wxICON_ERROR);
     return false;
   }
 
@@ -781,18 +781,18 @@ bool OpenGothicStarterApp::InitGothicVersion() {
 
   const wxString configPath = GetInstallConfigPath(runtime_paths);
   wxArrayString choices;
-  choices.Add(wxT("Gothic 1"));
-  choices.Add(wxT("Gothic 2 Classic"));
-  choices.Add(wxT("Gothic 2 Night of the Raven"));
+  choices.Add(_("Gothic 1"));
+  choices.Add(_("Gothic 2 Classic"));
+  choices.Add(_("Gothic 2 Night of the Raven"));
 
   wxSingleChoiceDialog dialog(
       nullptr,
       wxString::Format(
-          wxT("Gothic version could not be detected automatically.\n"
-              "Please choose the version for this installation.\n\n"
-              "The selection will be saved in:\n%s"),
+          _("Gothic version could not be detected automatically.\n"
+            "Please choose the version for this installation.\n\n"
+            "The selection will be saved in:\n%s"),
           configPath),
-      wxT("Select Gothic Version"), choices);
+      _("Select Gothic Version"), choices);
   dialog.SetSelection(2);
   if (dialog.ShowModal() != wxID_OK) {
     wxLogWarning(wxT("Gothic version selection was canceled by user."));
@@ -801,7 +801,7 @@ bool OpenGothicStarterApp::InitGothicVersion() {
 
   const int selection = dialog.GetSelection();
   if (selection < 0 || selection > 2) {
-    wxMessageBox(wxT("Selected Gothic version is invalid."), wxT("Configuration Error"),
+    wxMessageBox(_("Selected Gothic version is invalid."), _("Configuration Error"),
                  wxOK | wxICON_ERROR);
     return false;
   }
