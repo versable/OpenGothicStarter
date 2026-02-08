@@ -166,12 +166,12 @@ bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
   struct ExtractionState {
     std::map<uint16_t, std::vector<uint8_t>> icons;
     std::vector<uint8_t> groupIconData;
-  } state;
+  } extractionState;
 
   peparse::IterRsrc(
       parsed,
       [](void *N, const peparse::resource &r) -> int {
-        auto *state = static_cast<ExtractionState *>(N);
+        auto *extraction = static_cast<ExtractionState *>(N);
 
         if (r.type != peparse::RT_ICON && r.type != peparse::RT_GROUP_ICON) {
           return 0;
@@ -183,28 +183,28 @@ bool LoadIconFromPeExecutable(const wxString &path, wxIcon &icon) {
         }
 
         if (r.type == peparse::RT_ICON) {
-          if (r.name <= UINT16_MAX &&
-              state->icons.find(static_cast<uint16_t>(r.name)) == state->icons.end()) {
-            state->icons.emplace(static_cast<uint16_t>(r.name), std::move(bytes));
+          if (r.name <= UINT16_MAX && extraction->icons.find(static_cast<uint16_t>(r.name)) ==
+                                         extraction->icons.end()) {
+            extraction->icons.emplace(static_cast<uint16_t>(r.name), std::move(bytes));
           }
           return 0;
         }
 
-        if (state->groupIconData.empty()) {
-          state->groupIconData = std::move(bytes);
+        if (extraction->groupIconData.empty()) {
+          extraction->groupIconData = std::move(bytes);
         }
         return 0;
       },
-      &state);
+      &extractionState);
 
   peparse::DestructParsedPE(parsed);
 
-  if (state.groupIconData.empty() || state.icons.empty()) {
+  if (extractionState.groupIconData.empty() || extractionState.icons.empty()) {
     return false;
   }
 
   std::vector<uint8_t> icoData;
-  if (!BuildIco(state.groupIconData, state.icons, icoData)) {
+  if (!BuildIco(extractionState.groupIconData, extractionState.icons, icoData)) {
     return false;
   }
 

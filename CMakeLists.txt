@@ -4,6 +4,10 @@ project(OpenGothicStarter VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(OGS_STRICT_WARNINGS "Enable strict compiler warnings." ON)
+option(OGS_WARNINGS_AS_ERRORS "Treat warnings as errors." OFF)
+option(OGS_EXTRA_WARNINGS "Enable additional warning checks." OFF)
+
 # Find wxWidgets
 find_package(wxWidgets REQUIRED COMPONENTS core base)
 if(wxWidgets_FOUND)
@@ -35,13 +39,6 @@ else()
     message(STATUS "pe-parse not found: PE icon extraction support disabled")
 endif()
 
-# Set compile flags
-if (MSVC)
-    add_compile_options(/W4)
-else()
-    add_compile_options(-Wall -Wextra -O2)
-endif()
-
 # Source files
 set(SOURCES
     src/app.cpp
@@ -67,6 +64,46 @@ if(WIN32)
         wxUSE_GUI=1
         __WXMSW__
     )
+endif()
+
+if(OGS_STRICT_WARNINGS)
+    if(MSVC)
+        target_compile_options(${PROJECT_NAME} PRIVATE
+            /W4
+            /permissive-
+            /Zc:__cplusplus
+            /w14242
+            /w14254
+            /w14263
+            /w14265
+            /w14287
+            /w14296
+        )
+        if(OGS_WARNINGS_AS_ERRORS)
+            target_compile_options(${PROJECT_NAME} PRIVATE /WX)
+        endif()
+    else()
+        target_compile_options(${PROJECT_NAME} PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+            -Wshadow
+            -Wformat=2
+            -Wundef
+            -Wnon-virtual-dtor
+        )
+        if(OGS_EXTRA_WARNINGS)
+            target_compile_options(${PROJECT_NAME} PRIVATE
+                -Wold-style-cast
+                -Wconversion
+                -Wsign-conversion
+                -Wdouble-promotion
+            )
+        endif()
+        if(OGS_WARNINGS_AS_ERRORS)
+            target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
+        endif()
+    endif()
 endif()
 
 # ASan (Note: fixed typo in comment)
