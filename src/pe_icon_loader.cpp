@@ -19,8 +19,10 @@ bool ReadLe16(const std::vector<uint8_t> &data, size_t offset, uint16_t &value) 
     return false;
   }
 
-  value = static_cast<uint16_t>(data[offset]) |
-          (static_cast<uint16_t>(data[offset + 1]) << 8);
+  const uint16_t lo = static_cast<uint16_t>(data[offset]);
+  const uint16_t hi =
+      static_cast<uint16_t>(static_cast<uint16_t>(data[offset + 1]) << 8);
+  value = static_cast<uint16_t>(lo | hi);
   return true;
 }
 

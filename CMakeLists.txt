@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(OGS_STRICT_WARNINGS "Enable strict compiler warnings." ON)
 option(OGS_WARNINGS_AS_ERRORS "Treat warnings as errors." OFF)
 option(OGS_EXTRA_WARNINGS "Enable additional warning checks." OFF)
+option(OGS_HARDENED_BUILD "Enable compiler/linker hardening flags." OFF)
 
 # Find wxWidgets
 find_package(wxWidgets REQUIRED COMPONENTS core base)
@@ -109,6 +110,34 @@ if(OGS_STRICT_WARNINGS)
         if(OGS_WARNINGS_AS_ERRORS)
             target_compile_options(${PROJECT_NAME} PRIVATE -Werror)
         endif()
+    endif()
+endif()
+
+if(OGS_HARDENED_BUILD AND NOT MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        -fstack-protector-strong
+    )
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        $<$<NOT:$<CONFIG:Debug>>:_FORTIFY_SOURCE=3>
+    )
+
+    if(NOT APPLE)
+        target_compile_options(${PROJECT_NAME} PRIVATE
+            -fPIE
+            -fstack-clash-protection
+        )
+        target_link_options(${PROJECT_NAME} PRIVATE
+            -pie
+            -Wl,-z,relro
+            -Wl,-z,now
+            -Wl,-z,noexecstack
+        )
+    endif()
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        target_compile_options(${PROJECT_NAME} PRIVATE
+            -ftrivial-auto-var-init=zero
+        )
     endif()
 endif()
 

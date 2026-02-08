@@ -20,6 +20,9 @@
 #include <wx/stdpaths.h>
 
 const wxString APP_NAME = wxT("OpenGothicStarter");
+namespace {
+constexpr int kSizerExpandAll = static_cast<int>(wxALL) | static_cast<int>(wxEXPAND);
+}
 
 static long ExecuteAsyncCommand(const wxArrayString &command,
                                 const wxExecuteEnv &env) {
@@ -210,7 +213,7 @@ void MainPanel::InitWidgets() {
   list_ctrl = new wxListView(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                              wxLC_REPORT | wxLC_NO_HEADER | wxLC_SINGLE_SEL);
   list_ctrl->InsertColumn(0, wxT(""));
-  main_sizer->Add(list_ctrl, 1, wxALL | wxEXPAND, 5);
+  main_sizer->Add(list_ctrl, 1, kSizerExpandAll, 5);
 
   wxBoxSizer *side_sizer = new wxBoxSizer(wxVERTICAL);
   side_sizer->SetMinSize(wxSize(200, -1));
@@ -219,7 +222,7 @@ void MainPanel::InitWidgets() {
   button_start->Enable(false);
 
   side_sizer->AddSpacer(5);
-  side_sizer->Add(button_start, 0, wxALL | wxEXPAND);
+  side_sizer->Add(button_start, 0, kSizerExpandAll);
 
   check_orig = new wxCheckBox(this, wxID_ANY, wxT("Start game without mods"));
   check_window = new wxCheckBox(this, wxID_ANY, wxT("Window mode"));
@@ -243,20 +246,20 @@ void MainPanel::InitWidgets() {
   fxaa_sizer->Add(value_fxaa);
 
   side_sizer->AddSpacer(3);
-  side_sizer->Add(check_orig, 0, wxALL | wxEXPAND);
-  side_sizer->Add(check_window, 0, wxALL | wxEXPAND);
-  side_sizer->Add(check_marvin, 0, wxALL | wxEXPAND);
+  side_sizer->Add(check_orig, 0, kSizerExpandAll);
+  side_sizer->Add(check_window, 0, kSizerExpandAll);
+  side_sizer->Add(check_marvin, 0, kSizerExpandAll);
 #if defined(_WIN32)
-  side_sizer->Add(check_dx12, 0, wxALL | wxEXPAND);
+  side_sizer->Add(check_dx12, 0, kSizerExpandAll);
 #endif
-  side_sizer->Add(check_rt, 0, wxALL | wxEXPAND);
-  side_sizer->Add(check_rti, 0, wxALL | wxEXPAND);
-  side_sizer->Add(check_meshlets, 0, wxALL | wxEXPAND);
-  side_sizer->Add(check_vsm, 0, wxALL | wxEXPAND);
-  side_sizer->Add(check_bench, 0, wxALL | wxEXPAND);
+  side_sizer->Add(check_rt, 0, kSizerExpandAll);
+  side_sizer->Add(check_rti, 0, kSizerExpandAll);
+  side_sizer->Add(check_meshlets, 0, kSizerExpandAll);
+  side_sizer->Add(check_vsm, 0, kSizerExpandAll);
+  side_sizer->Add(check_bench, 0, kSizerExpandAll);
   side_sizer->AddSpacer(3);
-  side_sizer->Add(fxaa_sizer, 0, wxALL | wxEXPAND);
-  side_sizer->Add(slide_fxaa, 0, wxALL | wxEXPAND);
+  side_sizer->Add(fxaa_sizer, 0, kSizerExpandAll);
+  side_sizer->Add(slide_fxaa, 0, kSizerExpandAll);
 
   main_sizer->Add(side_sizer);
   SetSizer(main_sizer);

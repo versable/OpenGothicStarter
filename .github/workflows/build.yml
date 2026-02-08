@@ -48,10 +48,18 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libwxgtk3.2-dev
+        sudo apt-get install -y libwxgtk3.2-dev clang lld
 
     - name: Configure
-      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON
+      env:
+        CC: clang
+        CXX: clang++
+      run: |
+        cmake -S . -B build \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DOGS_WARNINGS_AS_ERRORS=ON \
+          -DOGS_EXTRA_WARNINGS=ON \
+          -DOGS_HARDENED_BUILD=ON
 
     - name: Build
       run: cmake --build build --parallel
