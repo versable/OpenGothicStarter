@@ -25,8 +25,11 @@ void AddDialogSettingRow(wxBoxSizer *parent, wxWindow *panel,
   auto *labelCtrl = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition,
                                      wxSize(200, -1));
   row->AddSpacer(5);
-  row->Add(labelCtrl, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  row->Add(control, 1, wxALL | wxEXPAND, 5);
+  row->Add(labelCtrl, 0,
+           static_cast<int>(wxALL) | static_cast<int>(wxALIGN_CENTER_VERTICAL),
+           5);
+  row->Add(control, 1,
+           static_cast<int>(wxALL) | static_cast<int>(wxEXPAND), 5);
   row->AddSpacer(5);
   parent->Add(row, 0, wxEXPAND);
 }
@@ -147,7 +150,8 @@ SettingsDialog::SettingsDialog(wxWindow *parent, GothicVersion initialVersion,
   buttonSizer->AddSpacer(5);
 
   mainSizer->AddStretchSpacer();
-  mainSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, 5);
+  mainSizer->Add(buttonSizer, 0,
+                 static_cast<int>(wxALL) | static_cast<int>(wxEXPAND), 5);
   panel->SetSizerAndFit(mainSizer);
 
   auto *dialogSizer = new wxBoxSizer(wxVERTICAL);
