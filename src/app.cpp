@@ -186,6 +186,8 @@ static GothicVersion DetectGothicVersion(const RuntimePaths &paths) {
 
 static wxString GothicVersionLabel(GothicVersion version) {
   switch (version) {
+  case GothicVersion::Unknown:
+    return wxT("Unknown");
   case GothicVersion::Gothic1:
     return wxT("Gothic 1");
   case GothicVersion::Gothic2Classic:
@@ -441,6 +443,9 @@ bool MainPanel::BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
       dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
       wxT("wxTheApp must be an OpenGothicStarterApp instance."));
   switch (app->gothic_version) {
+  case GothicVersion::Unknown:
+    error = wxT("Stored Gothic version is invalid. Please restart and select a valid version.");
+    return false;
   case GothicVersion::Gothic1:
     command.Add(wxT("-g1"));
     break;
