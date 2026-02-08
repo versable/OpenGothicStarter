@@ -6,11 +6,30 @@ mapfile -t files < <(
     grep -E '\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$' || true
 )
 
-if [ "${#files[@]}" -eq 0 ]; then
-  exit 0
+mapfile -t po_files < <(
+  git diff --cached --name-only --diff-filter=ACMR |
+    grep -E '^i18n/.+\.po$' || true
+)
+
+if [ "${#files[@]}" -gt 0 ]; then
+  ./scripts/format.sh "${files[@]}"
+  git add "${files[@]}"
+
+  echo "Formatted staged C/C++ files with clang-format."
 fi
 
-./scripts/format.sh "${files[@]}"
-git add "${files[@]}"
+if [ "${#po_files[@]}" -gt 0 ]; then
+  if ! command -v msgfmt >/dev/null 2>&1; then
+    echo "msgfmt is required to validate staged localization catalogs." >&2
+    exit 1
+  fi
 
-echo "Formatted staged C/C++ files with clang-format."
+  for po_file in "${po_files[@]}"; do
+    if ! output=$(msgfmt --check --check-format -o /dev/null "${po_file}" 2>&1); then
+      echo "${output}" >&2
+      exit 1
+    fi
+  done
+
+  echo "Validated staged localization catalogs with msgfmt."
+fi
