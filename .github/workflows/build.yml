@@ -20,8 +20,13 @@ jobs:
     steps:
     - id: version
       run: |
-        echo "version=OpenGothicStarter v0.1.0" >> "$GITHUB_OUTPUT"
-        echo "semver=0.1.0" >> "$GITHUB_OUTPUT"
+        if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+          semver="${GITHUB_REF_NAME#v}"
+        else
+          semver="$(grep -Po 'project\([^)]*VERSION\s+\K[0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt | head -n1)"
+        fi
+        echo "version=OpenGothicStarter v${semver}" >> "$GITHUB_OUTPUT"
+        echo "semver=${semver}" >> "$GITHUB_OUTPUT"
 
   format:
     runs-on: ubuntu-24.04
@@ -222,8 +227,11 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ github.ref_name }}
+        name: OpenGothicStarter v${{ needs.setup.outputs.semver }}
         draft: true
         prerelease: true
+        fail_on_unmatched_files: true
         files: |
           artifacts/opengothicstarter_${{ needs.setup.outputs.semver }}_linux_x64.zip
           artifacts/opengothicstarter_${{ needs.setup.outputs.semver }}_win_x64.zip
