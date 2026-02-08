@@ -3,32 +3,74 @@
 A cross-platform GUI launcher for OpenGothic, the open-source Gothic game
 engine reimplementation.
 
-## Features
+## Quick Start
 
-- **Game Management**: Automatically discovers and lists Gothic mods from your
-  Gothic installation
-- **Separation of save game files**: Uses Gothic-local save directories:
-  `Gothic/Saves` for no-mod runs and `Gothic/Saves/<MOD_NAME>` for mod runs.
-- **Launch Options**: Configure various OpenGothic parameters including:
-  - Window/Fullscreen mode
-  - Ray tracing and global illumination
-  - Marvin mode (developer console)
-  - FXAA anti-aliasing levels
-  - Virtual shadowmaps and meshlets
-- **Multi-Version Support**: Compatible with Gothic 1, Gothic 2 Classic, and
-  Gothic 2 Night of the Raven
-- **Cross-Platform**: Works on Windows, Linux, and macOS
+### Overview
 
-## Requirements
+- Discovers installed Gothic mods from your `system/` directory.
+- Auto-detects Gothic version (Gothic 1, Gothic 2 Classic, Gothic 2 NotR).
+- Launches OpenGothic with UI-configurable flags.
+- Uses Gothic-local save directories:
+  - no mod: `Gothic/Saves`
+  - mod run: `Gothic/Saves/<MOD_NAME>`
 
-### For Users (Released Binaries)
+### Requirements
 
-- **Windows**: Microsoft Visual C++ Redistributable (x64)
+- A Gothic installation (Steam or GOG) with a `Data/` and `system/` directory.
+- OpenGothic binary (`Gothic2Notr(.exe)`).
+- OpenGothicStarter binary (`OpenGothicStarter(.exe)`).
+- Windows only: Microsoft Visual C++ Redistributable (x64):
   - Direct download: https://aka.ms/vc14/vc_redist.x64.exe
-  - Official Microsoft page:
+  - Official page:
     https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version
 
-### For Developers (Build From Source)
+### Install Steps
+
+1. Locate your Gothic installation folder (`Data/` and `system/` must exist).
+2. Typical locations:
+   - Steam (Windows): `C:\Program Files (x86)\Steam\steamapps\common\Gothic II`
+   - Steam (Linux/Proton): `<SteamLibrary>/steamapps/common/Gothic II`
+   - GOG (Windows): `C:\GOG Games\Gothic 2 Gold`
+3. Download OpenGothic binaries:
+   - Releases: https://github.com/Try/OpenGothic/releases
+   - Latest AppVeyor builds: https://ci.appveyor.com/project/Try/opengothic/history?branch=master
+4. Copy binaries into your Gothic `system/` directory:
+   - `OpenGothicStarter(.exe)` from this project
+   - `Gothic2Notr(.exe)` from OpenGothic
+5. Start `OpenGothicStarter` from the same `system/` directory.
+
+### macOS Data Extraction
+
+If your Gothic data is from GOG installers, use the Offline Backup installer files
+and extract with `innoextract` (or follow Mac Source Ports extraction guidance):
+https://www.macsourceports.com/faq/
+
+Place extracted game data where OpenGothic expects it, commonly under:
+`~/Library/Application Support/OpenGothic`
+
+### First Launch Behavior
+
+- If Gothic version is detected, launcher stores it in:
+  `system/OpenGothicStarter.ini`
+- If detection fails, launcher asks you to choose Gothic version once and stores it
+  in the same file.
+
+### Mods
+
+- Install mods with their normal installer/process.
+- The launcher auto-detects installed mod `.ini` files in `Gothic/system/`.
+- Use "Start game without mods" for vanilla runs.
+
+### Runtime Layout
+
+- Launcher: `Gothic/system/OpenGothicStarter(.exe)`
+- Engine binary: `Gothic/system/Gothic2Notr(.exe)`
+- No-mod working directory: `Gothic/Saves`
+- Mod working directory: `Gothic/Saves/<MOD_NAME>`
+
+## Developer Setup
+
+### Build Requirements
 
 - [OpenGothic](https://github.com/Try/OpenGothic) engine
 - Original Gothic game files
@@ -36,19 +78,21 @@ engine reimplementation.
 - C++17 compatible compiler
 - wxWidgets
 
-### Debian based systems
+### Platform Dependencies
+
+#### Debian-based systems
 
 ```bash
 sudo apt-get install -y libwxgtk3.2-dev
 ```
 
-### macOS
+#### macOS
 
 ```bash
 brew install wxwidgets
 ```
 
-### Windows
+#### Windows
 
 ```bash
 git clone https://github.com/microsoft/vcpkg C:\vcpkg
@@ -61,7 +105,7 @@ cmake -S . -B build -G "Visual Studio 17 2022" -A x64 \
 cmake --build build --config RelWithDebInfo --parallel
 ```
 
-## Building
+### Build From Source
 
 ```bash
 git clone <repository-url>
@@ -91,48 +135,20 @@ cmake -S . -B build-debug -G "Visual Studio 17 2022" -A x64 \
 cmake --build build-debug --config Debug --parallel
 ```
 
-## Development
+### Development Workflow
 
-### Formatting
+#### Formatting
 
 This repository uses `clang-format` with the checked-in `.clang-format`.
-
-Format all C/C++ sources:
 
 ```bash
 ./scripts/format.sh
 ```
 
-### Pre-commit Hook
+#### Pre-commit Hook
 
-Enable the repository hook that formats staged C/C++ files before commit.
-Set this for the current repository only:
+Enable repository-local hooks:
 
 ```bash
 git config --local core.hooksPath .githooks
 ```
-
-## Setup
-
-1. Copy `OpenGothicStarter` into your `Gothic/system/` directory.
-2. Ensure the OpenGothic executable is present in `Gothic/system/`.
-3. Place mod `.ini` files in `Gothic/system/`.
-
-## Usage
-
-- **Select Mod**: Choose a mod from the list (or leave empty for vanilla)
-- **Configure Options**: Use checkboxes and sliders to set launch parameters
-- **Start Game**: Click "Start Game" or double-click a mod entry
-
-## Mod Discovery
-
-The launcher automatically scans your `Gothic/system/` directory for `.ini`
-files with `[INFO]` and `[FILES]` sections, displaying them as available mods
-with their titles and icons.
-
-## Runtime Layout
-
-- Launcher location: `Gothic/system/OpenGothicStarter(.exe)`
-- OpenGothic executable: `Gothic/system/Gothic2Notr(.exe)` (or `OpenGothic(.exe)`)
-- No-mod working directory: `Gothic/Saves`
-- Mod working directory: `Gothic/Saves/<MOD_NAME>`
