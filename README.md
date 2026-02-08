@@ -40,6 +40,8 @@ engine reimplementation.
 5. Copy binaries into your Gothic `system/` directory:
    - `OpenGothicStarter(.exe)` from this project
    - `Gothic2Notr(.exe)` from OpenGothic
+   - Translations are bundled in `OpenGothicStarter`; no separate `locale/`
+     folder is required.
 6. Start `OpenGothicStarter` from the same `system/` directory.
 
 ### macOS Data Extraction

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on Common Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.2.0] - 2026-02-08
+
+- Added full launcher localization infrastructure with gettext catalogs,
+  install-level language override support, and German translations.
+- Added automated i18n quality gates in hooks and CI, including `.po` validation
+  and POT/source sync checks.
+- Added settings dialog support for selecting and persisting both Gothic version
+  and launcher language.
+- Applied language changes immediately without restarting the launcher process.
+- Embedded locale catalogs into the launcher binary and load them from an
+  XDG-compliant user cache, removing runtime dependency on external `locale/`
+  deployment.
+- Improved release artifact packaging to include locale assets across all
+  platform jobs.
+
 ## [0.1.1] - 2026-02-08
 
 - Improved startup and launch error messages with clearer, actionable paths.
@@ -33,6 +48,7 @@ and this project adheres to Semantic Versioning.
 
 _First release._
 
+[0.2.0]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.0
 [0.1.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.1.1
 [0.1.0]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.1.0
 [0.0.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.0.1
