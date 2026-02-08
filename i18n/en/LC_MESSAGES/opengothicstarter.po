@@ -12,15 +12,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/app.cpp:268
 msgid "Anti-Aliasing:"
 msgstr ""
 
-#: src/app.cpp:266
 msgid "Benchmark"
 msgstr ""
 
-#: src/app.cpp:577
 #, c-format
 msgid ""
 "Cannot start game because the Gothic runtime layout is invalid.\n"
@@ -32,66 +29,65 @@ msgid ""
 "Fix the installation layout and try again."
 msgstr ""
 
-#: src/app.cpp:566 src/app.cpp:583 src/app.cpp:591 src/app.cpp:599
-#: src/app.cpp:830
 msgid "Configuration Error"
 msgstr ""
 
-#: src/app.cpp:608
-msgid "Failed to start OpenGothic process."
-msgstr ""
-
-#: src/app.cpp:260
-msgid "Force DirectX 12"
-msgstr ""
-
-#: src/app.cpp:263
-msgid "Global illumination"
-msgstr ""
-
-#: src/app.cpp:810
-msgid "Gothic 1"
-msgstr ""
-
-#: src/app.cpp:811
-msgid "Gothic 2 Classic"
-msgstr ""
-
-#: src/app.cpp:812
-msgid "Gothic 2 Night of the Raven"
-msgstr ""
-
-#: src/app.cpp:817
 #, c-format
 msgid ""
-"Gothic version could not be detected automatically.\n"
-"Please choose the version for this installation.\n"
-"\n"
-"The selection will be saved in:\n"
+"Failed to save Gothic version to:\n"
 "%s"
 msgstr ""
 
-#: src/app.cpp:721
+#, c-format
+msgid ""
+"Failed to save language setting to:\n"
+"%s"
+msgstr ""
+
+msgid "Failed to start OpenGothic process."
+msgstr ""
+
+msgid "Force DirectX 12"
+msgstr ""
+
+msgid "Global illumination"
+msgstr ""
+
+msgid "Gothic 1"
+msgstr ""
+
+msgid "Gothic 2 Classic"
+msgstr ""
+
+msgid "Gothic 2 Night of the Raven"
+msgstr ""
+
+msgid ""
+"Gothic version could not be detected automatically.\n"
+"Please choose the version for this installation."
+msgstr ""
+
+msgid "Gothic version:"
+msgstr ""
+
 msgid "Invalid Launcher Location"
 msgstr ""
 
-#: src/app.cpp:608
+msgid "Language:"
+msgstr ""
+
 msgid "Launch Failed"
 msgstr ""
 
-#: src/app.cpp:258
 msgid "Marvin mode"
 msgstr ""
 
-#: src/app.cpp:264
 msgid "Meshlets"
 msgstr ""
 
-#: src/app.cpp:744
 msgid "OpenGothic Not Found"
 msgstr ""
 
-#: src/app.cpp:740
 #, c-format
 msgid ""
 "OpenGothic binary was not found.\n"
@@ -103,7 +99,6 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/app.cpp:716
 #, c-format
 msgid ""
 "OpenGothicStarter must be started from '<Gothic>/system'.\n"
@@ -115,39 +110,42 @@ msgid ""
 "%s"
 msgstr ""
 
-#: src/app.cpp:262
 msgid "Ray tracing"
 msgstr ""
 
-#: src/app.cpp:821
 msgid "Select Gothic Version"
 msgstr ""
 
-#: src/app.cpp:830
 msgid "Selected Gothic version is invalid."
 msgstr ""
 
-#: src/app.cpp:250
+msgid "Settings"
+msgstr ""
+
+msgid "Settings saved."
+msgstr ""
+
+msgid "Settings saved. Restart the launcher to apply language changes."
+msgstr ""
+
 msgid "Start Game"
 msgstr ""
 
-#: src/app.cpp:256
 msgid "Start game without mods"
 msgstr ""
 
-#: src/app.cpp:479 src/app.cpp:491
 msgid ""
 "Stored Gothic version is invalid. Please restart and select a valid version."
 msgstr ""
 
-#: src/app.cpp:265
+msgid "System default"
+msgstr ""
+
 msgid "Virtual Shadowmap"
 msgstr ""
 
-#: src/app.cpp:257
 msgid "Window mode"
 msgstr ""
 
-#: src/app.cpp:410 src/app.cpp:436
 msgid "none"
 msgstr ""

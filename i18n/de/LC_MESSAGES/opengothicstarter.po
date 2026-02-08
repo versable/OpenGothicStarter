@@ -17,15 +17,12 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: src/app.cpp:268
 msgid "Anti-Aliasing:"
 msgstr "Anti-Aliasing:"
 
-#: src/app.cpp:266
 msgid "Benchmark"
 msgstr "Benchmark"
 
-#: src/app.cpp:577
 #, c-format
 msgid ""
 "Cannot start game because the Gothic runtime layout is invalid.\n"
@@ -36,8 +33,8 @@ msgid ""
 "\n"
 "Fix the installation layout and try again."
 msgstr ""
-"Das Spiel konnte nicht gestartet werden. "
-"Die Gothic Ordnerstruktur ist ungültig.\n"
+"Das Spiel konnte nicht gestartet werden. Die Gothic Ordnerstruktur ist "
+"ungültig.\n"
 "\n"
 "Erwartete Dateien im selben Verzeichnis:\n"
 "- %s\n"
@@ -45,71 +42,71 @@ msgstr ""
 "\n"
 "Bitte Installationslayout korrigieren und erneut versuchen."
 
-#: src/app.cpp:566 src/app.cpp:583 src/app.cpp:591 src/app.cpp:599
-#: src/app.cpp:830
 msgid "Configuration Error"
 msgstr "Konfigurationsfehler"
 
-#: src/app.cpp:608
+#, c-format
+msgid ""
+"Failed to save Gothic version to:\n"
+"%s"
+msgstr ""
+"Die Gothic-Version konnte nicht gespeichert werden unter:\n"
+"%s"
+
+#, c-format
+msgid ""
+"Failed to save language setting to:\n"
+"%s"
+msgstr ""
+"Die Spracheinstellungen konnten nicht gespeichert werden unter:\n"
+"%s"
+
 msgid "Failed to start OpenGothic process."
 msgstr "OpenGothic-Prozess konnte nicht gestartet werden."
 
-#: src/app.cpp:260
 msgid "Force DirectX 12"
 msgstr "DirectX 12 erzwingen"
 
-#: src/app.cpp:263
 msgid "Global illumination"
 msgstr "Globale Beleuchtung"
 
-#: src/app.cpp:810
 msgid "Gothic 1"
 msgstr "Gothic 1"
 
-#: src/app.cpp:811
 msgid "Gothic 2 Classic"
 msgstr "Gothic 2 Classic"
 
-#: src/app.cpp:812
 msgid "Gothic 2 Night of the Raven"
-msgstr "Gothic 2 Die Nacht der Raben"
+msgstr "Gothic 2 Die Nacht des Raben"
 
-#: src/app.cpp:817
-#, c-format
 msgid ""
 "Gothic version could not be detected automatically.\n"
-"Please choose the version for this installation.\n"
-"\n"
-"The selection will be saved in:\n"
-"%s"
+"Please choose the version for this installation."
 msgstr ""
-"Gothic-Version konnte nicht automatisch erkannt werden.\n"
-"Bitte wählen Sie die Version für diese Installation aus.\n"
-"\n"
-"Die Änderung wird hier gespeichert:\n"
-"%s"
+"Die Gothic-Version konnte nicht automatisch erkannt werden.\n"
+"Bitte wählen Sie die Version für diese Installation aus."
 
-#: src/app.cpp:721
+msgid "Gothic version:"
+msgstr "Gothic-Version:"
+
 msgid "Invalid Launcher Location"
 msgstr "Ungültiges Launcher-Verzeichnis"
 
-#: src/app.cpp:608
+msgid "Language:"
+msgstr "Sprache:"
+
 msgid "Launch Failed"
 msgstr "Start fehlgeschlagen"
 
-#: src/app.cpp:258
 msgid "Marvin mode"
 msgstr "Marvin-Modus"
 
-#: src/app.cpp:264
 msgid "Meshlets"
 msgstr "Meshlets"
 
-#: src/app.cpp:744
 msgid "OpenGothic Not Found"
 msgstr "OpenGothic nicht gefunden"
 
-#: src/app.cpp:740
 #, c-format
 msgid ""
 "OpenGothic binary was not found.\n"
@@ -128,7 +125,6 @@ msgstr ""
 "Erwartete Datei:\n"
 "%s"
 
-#: src/app.cpp:716
 #, c-format
 msgid ""
 "OpenGothicStarter must be started from '<Gothic>/system'.\n"
@@ -147,41 +143,60 @@ msgstr ""
 "Erwartete Begleit-Binärdatei in diesem Verzeichnis:\n"
 "%s"
 
-#: src/app.cpp:262
 msgid "Ray tracing"
 msgstr "Raytracing"
 
-#: src/app.cpp:821
 msgid "Select Gothic Version"
 msgstr "Gothic-Version auswählen"
 
-#: src/app.cpp:830
 msgid "Selected Gothic version is invalid."
 msgstr "Die gewählte Gothic-Version ist ungültig."
 
-#: src/app.cpp:250
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Settings saved."
+msgstr "Einstellungen gespeichert."
+
+msgid "Settings saved. Restart the launcher to apply language changes."
+msgstr ""
+"Einstellungen gespeichert. Bitte starten Sie den Launcher neu, um die "
+"Sprachänderung anzuwenden."
+
 msgid "Start Game"
 msgstr "Spiel starten"
 
-#: src/app.cpp:256
 msgid "Start game without mods"
 msgstr "Spiel ohne Mods starten"
 
-#: src/app.cpp:479 src/app.cpp:491
 msgid ""
 "Stored Gothic version is invalid. Please restart and select a valid version."
 msgstr ""
 "Die gespeicherte Gothic-Version ist ungültig. Bitte starten Sie neu und "
 "wählen Sie eine gültige Version aus."
 
-#: src/app.cpp:265
+msgid "System default"
+msgstr "Systemstandard"
+
 msgid "Virtual Shadowmap"
 msgstr "Virtuelle Shadowmap"
 
-#: src/app.cpp:257
 msgid "Window mode"
 msgstr "Fenstermodus"
 
-#: src/app.cpp:410 src/app.cpp:436
 msgid "none"
 msgstr "keine"
+
+#, c-format
+#~ msgid ""
+#~ "Gothic version could not be detected automatically.\n"
+#~ "Please choose the version for this installation.\n"
+#~ "\n"
+#~ "The selection will be saved in:\n"
+#~ "%s"
+#~ msgstr ""
+#~ "Gothic-Version konnte nicht automatisch erkannt werden.\n"
+#~ "Bitte wählen Sie die Version für diese Installation aus.\n"
+#~ "\n"
+#~ "Die Änderung wird hier gespeichert:\n"
+#~ "%s"
