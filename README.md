@@ -44,9 +44,7 @@ engine reimplementation.
 4. Download OpenGothic binaries:
    - Releases: https://github.com/Try/OpenGothic/releases
    - Latest AppVeyor builds: https://ci.appveyor.com/project/Try/opengothic/history?branch=master
-5. Copy binaries into your Gothic `system/` directory:
-   - `OpenGothicStarter(.exe)` from this project
-   - `Gothic2Notr(.exe)` from OpenGothic
+5. Extract both release ZIP archives into your Gothic `system/` directory.
 6. Start `OpenGothicStarter` from the same `system/` directory.
 
 ### Windows First Launch
