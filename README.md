@@ -19,7 +19,16 @@ engine reimplementation.
   Gothic 2 Night of the Raven
 - **Cross-Platform**: Works on Windows, Linux, and macOS
 
-## Prerequisites
+## Requirements
+
+### For Users (Released Binaries)
+
+- **Windows**: Microsoft Visual C++ Redistributable (x64)
+  - Direct download: https://aka.ms/vc14/vc_redist.x64.exe
+  - Official Microsoft page:
+    https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170#latest-supported-redistributable-version
+
+### For Developers (Build From Source)
 
 - [OpenGothic](https://github.com/Try/OpenGothic) engine
 - Original Gothic game files
@@ -33,7 +42,7 @@ engine reimplementation.
 sudo apt-get install -y libwxgtk3.2-dev
 ```
 
-### MacOS
+### macOS
 
 ```bash
 brew install wxwidgets
@@ -42,10 +51,18 @@ brew install wxwidgets
 ### Windows
 
 ```bash
-vcpkg install
+git clone https://github.com/microsoft/vcpkg C:\vcpkg
+C:\vcpkg\bootstrap-vcpkg.bat
+C:\vcpkg\vcpkg.exe install --triplet x64-windows
+
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 \
+  -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build --config RelWithDebInfo --parallel
 ```
 
 ## Building
+
 ```bash
 git clone <repository-url>
 cd OpenGothicStarter
