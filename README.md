@@ -105,10 +105,11 @@ Format all C/C++ sources:
 
 ### Pre-commit Hook
 
-Enable the repository hook that formats staged C/C++ files before commit:
+Enable the repository hook that formats staged C/C++ files before commit.
+Set this for the current repository only:
 
 ```bash
-git config core.hooksPath .githooks
+git config --local core.hooksPath .githooks
 ```
 
 ## Setup
