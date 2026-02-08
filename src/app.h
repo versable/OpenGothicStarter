@@ -8,6 +8,13 @@
 
 extern const wxString APP_NAME;
 
+enum class GothicVersion : int {
+  Unknown = -1,
+  Gothic1 = 0,
+  Gothic2Classic = 1,
+  Gothic2Notr = 2
+};
+
 struct GameEntry {
   wxString file;
   wxString title;
@@ -77,7 +84,7 @@ public:
 
   RuntimePaths runtime_paths;
   bool runtime_paths_resolved = false;
-  int gothic_version = -1;
+  GothicVersion gothic_version = GothicVersion::Unknown;
 
 private:
   bool InitConfig();
