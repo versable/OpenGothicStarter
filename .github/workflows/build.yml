@@ -44,8 +44,34 @@ jobs:
     - name: Verify formatting
       run: git diff --exit-code
 
+  i18n:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install gettext tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gettext
+
+    - name: Validate localization catalogs
+      run: |
+        mapfile -t catalog_files < <(find i18n -type f -name '*.po' | sort)
+        if [ "${#catalog_files[@]}" -eq 0 ]; then
+          echo "No localization catalog files found under i18n/."
+          exit 0
+        fi
+
+        for catalog in "${catalog_files[@]}"; do
+          echo "Checking ${catalog}"
+          if ! output=$(msgfmt --check --check-format -o /dev/null "${catalog}" 2>&1); then
+            echo "${output}"
+            exit 1
+          fi
+        done
+
   tidy:
-    needs: [format]
+    needs: [format, i18n]
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
