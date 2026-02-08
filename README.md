@@ -70,6 +70,27 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build --parallel
 ```
 
+### Debug Build
+
+#### Linux / macOS
+
+```bash
+cmake -S . -B build-debug -DCMAKE_BUILD_TYPE=Debug -DOGS_WARNINGS_AS_ERRORS=ON
+cmake --build build-debug --parallel
+```
+
+`Debug` builds on non-Windows automatically enable AddressSanitizer in this
+project.
+
+#### Windows (Visual Studio + vcpkg)
+
+```bash
+cmake -S . -B build-debug -G "Visual Studio 17 2022" -A x64 \
+  -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake \
+  -DOGS_WARNINGS_AS_ERRORS=ON
+cmake --build build-debug --config Debug --parallel
+```
+
 ## Development
 
 ### Formatting
