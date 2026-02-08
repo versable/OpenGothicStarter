@@ -57,6 +57,16 @@ Place extracted game data where OpenGothic expects it, commonly under:
   `system/OpenGothicStarter.ini`
 - If detection fails, launcher asks you to choose Gothic version once and stores it
   in the same file.
+- Language selection uses system locale by default.
+- Optional install-level override in `system/OpenGothicStarter.ini`:
+
+```ini
+[GENERAL]
+language=de
+```
+
+Use `language[_REGION]` codes (ISO 639 language + optional ISO 3166 region),
+for example: `de`, `en`, `en_US`.
 
 ### Mods
 
