@@ -104,6 +104,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
     - name: Cache vcpkg
       uses: actions/cache@v4
       with:
@@ -139,18 +143,18 @@ jobs:
     - name: Configure
       shell: pwsh
       run: |
-        cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON
+        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON
 
     - name: Build
       shell: pwsh
       run: |
-        cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+        cmake --build build --parallel
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: opengothicstarter_${{ needs.setup.outputs.semver }}_win_x64
-        path: build/${{ env.BUILD_TYPE }}/OpenGothicStarter.exe
+        path: build/OpenGothicStarter.exe
 
   macos-arm64:
     needs: [setup, format, tidy]
