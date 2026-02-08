@@ -20,7 +20,21 @@
 #include <wx/stdpaths.h>
 
 const wxString APP_NAME = wxT("OpenGothicStarter");
-static constexpr int ID_SLIDER_FXAA = 2010;
+namespace {
+constexpr int ID_BUTTON_START = 1001;
+constexpr int ID_CHECK_ORIGINAL = 2001;
+constexpr int ID_CHECK_WINDOW = 2002;
+constexpr int ID_CHECK_MARVIN = 2003;
+constexpr int ID_CHECK_RT = 2004;
+constexpr int ID_CHECK_GI = 2005;
+constexpr int ID_CHECK_MESHLETS = 2006;
+constexpr int ID_CHECK_VSM = 2007;
+constexpr int ID_CHECK_BENCHMARK = 2008;
+#if defined(_WIN32)
+constexpr int ID_CHECK_DX12 = 2009;
+#endif
+constexpr int ID_SLIDER_FXAA = 2010;
+} // namespace
 
 static long ExecuteAsyncCommand(const wxArrayString &command,
                                 const wxExecuteEnv &env) {
@@ -204,17 +218,17 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
   EVT_LIST_ITEM_SELECTED(wxID_ANY, MainPanel::OnSelected)
   EVT_LIST_ITEM_DESELECTED(wxID_ANY, MainPanel::OnSelected)
   EVT_LIST_ITEM_ACTIVATED(wxID_ANY, MainPanel::OnStart)
-  EVT_BUTTON(1001, MainPanel::OnStart)
-  EVT_CHECKBOX(2001, MainPanel::OnOrigin)
-  EVT_CHECKBOX(2002, MainPanel::OnParams)
-  EVT_CHECKBOX(2003, MainPanel::OnParams)
-  EVT_CHECKBOX(2004, MainPanel::OnParams)
-  EVT_CHECKBOX(2005, MainPanel::OnParams)
-  EVT_CHECKBOX(2006, MainPanel::OnParams)
-  EVT_CHECKBOX(2007, MainPanel::OnParams)
-  EVT_CHECKBOX(2008, MainPanel::OnParams)
+  EVT_BUTTON(ID_BUTTON_START, MainPanel::OnStart)
+  EVT_CHECKBOX(ID_CHECK_ORIGINAL, MainPanel::OnOrigin)
+  EVT_CHECKBOX(ID_CHECK_WINDOW, MainPanel::OnParams)
+  EVT_CHECKBOX(ID_CHECK_MARVIN, MainPanel::OnParams)
+  EVT_CHECKBOX(ID_CHECK_RT, MainPanel::OnParams)
+  EVT_CHECKBOX(ID_CHECK_GI, MainPanel::OnParams)
+  EVT_CHECKBOX(ID_CHECK_MESHLETS, MainPanel::OnParams)
+  EVT_CHECKBOX(ID_CHECK_VSM, MainPanel::OnParams)
+  EVT_CHECKBOX(ID_CHECK_BENCHMARK, MainPanel::OnParams)
 #if defined(_WIN32)
-  EVT_CHECKBOX(2009, MainPanel::OnParams)
+  EVT_CHECKBOX(ID_CHECK_DX12, MainPanel::OnParams)
 #endif
   EVT_SLIDER(ID_SLIDER_FXAA, MainPanel::OnFXAAScroll)
 wxEND_EVENT_TABLE()
@@ -236,23 +250,23 @@ void MainPanel::InitWidgets() {
   wxBoxSizer *side_sizer = new wxBoxSizer(wxVERTICAL);
   side_sizer->SetMinSize(wxSize(200, -1));
 
-  button_start = new wxButton(this, 1001, wxT("Start Game"));
+  button_start = new wxButton(this, ID_BUTTON_START, wxT("Start Game"));
   button_start->Enable(false);
 
   side_sizer->AddSpacer(5);
   side_sizer->Add(button_start, 0, wxALL | wxEXPAND);
 
-  check_orig = new wxCheckBox(this, 2001, wxT("Start game without mods"));
-  check_window = new wxCheckBox(this, 2002, wxT("Window mode"));
-  check_marvin = new wxCheckBox(this, 2003, wxT("Marvin mode"));
+  check_orig = new wxCheckBox(this, ID_CHECK_ORIGINAL, wxT("Start game without mods"));
+  check_window = new wxCheckBox(this, ID_CHECK_WINDOW, wxT("Window mode"));
+  check_marvin = new wxCheckBox(this, ID_CHECK_MARVIN, wxT("Marvin mode"));
 #if defined(_WIN32)
-  check_dx12 = new wxCheckBox(this, 2009, wxT("Force DirectX 12"));
+  check_dx12 = new wxCheckBox(this, ID_CHECK_DX12, wxT("Force DirectX 12"));
 #endif
-  check_rt = new wxCheckBox(this, 2004, wxT("Ray tracing"));
-  check_rti = new wxCheckBox(this, 2005, wxT("Global illumination"));
-  check_meshlets = new wxCheckBox(this, 2006, wxT("Meshlets"));
-  check_vsm = new wxCheckBox(this, 2007, wxT("Virtual Shadowmap"));
-  check_bench = new wxCheckBox(this, 2008, wxT("Benchmark"));
+  check_rt = new wxCheckBox(this, ID_CHECK_RT, wxT("Ray tracing"));
+  check_rti = new wxCheckBox(this, ID_CHECK_GI, wxT("Global illumination"));
+  check_meshlets = new wxCheckBox(this, ID_CHECK_MESHLETS, wxT("Meshlets"));
+  check_vsm = new wxCheckBox(this, ID_CHECK_VSM, wxT("Virtual Shadowmap"));
+  check_bench = new wxCheckBox(this, ID_CHECK_BENCHMARK, wxT("Benchmark"));
 
   field_fxaa = new wxStaticText(this, wxID_ANY, wxT("Anti-Aliasing:"));
   value_fxaa = new wxStaticText(this, wxID_ANY, wxT(""));
