@@ -26,6 +26,20 @@ struct GameEntry {
   wxString datadir;
 };
 
+class SettingsDialog : public wxDialog {
+public:
+  SettingsDialog(wxWindow *parent, GothicVersion initialVersion,
+                 const wxString &initialLanguage);
+
+  GothicVersion GetSelectedVersion() const;
+  wxString GetLanguageOverride() const;
+
+private:
+  wxChoice *version_choice;
+  wxChoice *language_choice;
+  std::vector<wxString> language_codes;
+};
+
 class MainPanel : public wxPanel {
 public:
   MainPanel(wxWindow *parent);
@@ -37,6 +51,7 @@ private:
   void OnSelected(wxListEvent &);
   void OnFXAAScroll(wxCommandEvent &);
   void DoStart();
+  void DoSettings();
   void DoOrigin();
   bool BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
                           wxArrayString &command, wxString &error) const;
@@ -49,6 +64,7 @@ private:
 
   wxListView *list_ctrl;
   wxButton *button_start;
+  wxButton *button_settings;
   wxCheckBox *check_orig;
   wxCheckBox *check_window;
   wxCheckBox *check_marvin;

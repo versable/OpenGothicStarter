@@ -83,6 +83,106 @@ wxArrayString BuildGothicVersionChoices() {
   choices.Add(_("Gothic 2 Night of the Raven"));
   return choices;
 }
+
+wxArrayString BuildLocalizationLookupPaths() {
+  wxArrayString paths;
+
+  wxFileName exeFile(wxStandardPaths::Get().GetExecutablePath());
+  exeFile.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
+  const wxString exeDir = exeFile.GetPath();
+
+  paths.Add(wxFileName(exeDir, wxT("locale")).GetFullPath());
+
+  wxFileName installPrefix(exeDir, wxEmptyString);
+  installPrefix.Normalize(wxPATH_NORM_DOTS | wxPATH_NORM_ABSOLUTE);
+  if (!installPrefix.GetDirs().empty()) {
+    installPrefix.RemoveLastDir(); // bin -> install prefix
+    const wxString shareDir =
+        wxFileName(installPrefix.GetPath(), wxT("share")).GetFullPath();
+    paths.Add(wxFileName(shareDir, wxT("locale")).GetFullPath());
+  }
+
+  return paths;
+}
+
+bool HasLanguageCatalog(const wxString &localeRoot,
+                        const wxString &languageCode) {
+  const wxString languageDir =
+      wxFileName(localeRoot, languageCode).GetFullPath();
+  const wxString lcMessagesDir =
+      wxFileName(languageDir, wxT("LC_MESSAGES")).GetFullPath();
+  const wxString catalogPath =
+      wxFileName(lcMessagesDir, wxT("opengothicstarter.mo")).GetFullPath();
+  return wxFileName::FileExists(catalogPath);
+}
+
+wxArrayString DetectAvailableLanguageCodes() {
+  wxArrayString languageCodes;
+
+  const wxArrayString lookupPaths = BuildLocalizationLookupPaths();
+  for (const wxString &path : lookupPaths) {
+    if (!wxDir::Exists(path)) {
+      continue;
+    }
+
+    wxDir localeDir(path);
+    wxString languageCode;
+    bool hasDir = localeDir.GetFirst(&languageCode, wxEmptyString, wxDIR_DIRS);
+    while (hasDir) {
+      if (HasLanguageCatalog(path, languageCode) &&
+          languageCodes.Index(languageCode, false) == wxNOT_FOUND) {
+        languageCodes.Add(languageCode);
+      }
+      hasDir = localeDir.GetNext(&languageCode);
+    }
+  }
+
+  languageCodes.Sort();
+  return languageCodes;
+}
+
+wxString DisplayNameForLanguageCode(const wxString &languageCode) {
+  const wxLanguageInfo *langInfo = wxLocale::FindLanguageInfo(languageCode);
+  if (langInfo == nullptr || langInfo->Description.empty()) {
+    return languageCode;
+  }
+
+  return langInfo->Description;
+}
+
+void BuildLanguageChoices(const wxString &currentLanguage,
+                          wxArrayString &displayChoices,
+                          std::vector<wxString> &codes) {
+  displayChoices.clear();
+  codes.clear();
+
+  displayChoices.Add(_("System default"));
+  codes.push_back(wxEmptyString);
+
+  wxArrayString detectedCodes = DetectAvailableLanguageCodes();
+  if (!currentLanguage.empty() &&
+      detectedCodes.Index(currentLanguage, false) == wxNOT_FOUND) {
+    detectedCodes.Add(currentLanguage);
+  }
+  detectedCodes.Sort();
+
+  for (const wxString &code : detectedCodes) {
+    displayChoices.Add(DisplayNameForLanguageCode(code));
+    codes.push_back(code);
+  }
+}
+
+void AddDialogSettingRow(wxBoxSizer *parent, wxWindow *panel,
+                         const wxString &label, wxWindow *control) {
+  auto *row = new wxBoxSizer(wxHORIZONTAL);
+  auto *labelCtrl = new wxStaticText(panel, wxID_ANY, label, wxDefaultPosition,
+                                     wxSize(200, -1));
+  row->AddSpacer(5);
+  row->Add(labelCtrl, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+  row->Add(control, 1, wxALL | wxEXPAND, 5);
+  row->AddSpacer(5);
+  parent->Add(row, 0, wxEXPAND);
+}
 } // namespace
 
 static long ExecuteAsyncCommand(const wxArrayString &command,
@@ -243,6 +343,23 @@ static bool WriteStoredGothicVersion(const RuntimePaths &paths,
   return cfg.Flush();
 }
 
+static bool WriteStoredLanguageOverride(const RuntimePaths &paths,
+                                        const wxString &language) {
+  wxString normalized = language;
+  normalized.Trim(true);
+  normalized.Trim(false);
+
+  const wxString configPath = GetInstallConfigPath(paths);
+  wxFileConfig cfg(wxEmptyString, wxEmptyString, configPath, wxEmptyString,
+                   wxCONFIG_USE_LOCAL_FILE);
+  if (normalized.empty()) {
+    cfg.DeleteEntry(wxT("GENERAL/language"), false);
+  } else {
+    cfg.Write(wxT("GENERAL/language"), normalized);
+  }
+  return cfg.Flush();
+}
+
 static GothicVersion DetectGothicVersion(const RuntimePaths &paths) {
   const wxString dataDir = wxFileName(paths.gothic_root, wxT("Data")).GetFullPath();
   const wxString systemDir = paths.system_dir;
@@ -284,6 +401,71 @@ static wxString GothicVersionLabel(GothicVersion version) {
   }
 }
 
+SettingsDialog::SettingsDialog(wxWindow *parent, GothicVersion initialVersion,
+                               const wxString &initialLanguage)
+    : wxDialog(parent, wxID_ANY, _("Settings"), wxDefaultPosition,
+               wxSize(600, -1), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER) {
+  auto *panel = new wxPanel(this);
+  auto *mainSizer = new wxBoxSizer(wxVERTICAL);
+
+  version_choice =
+      new wxChoice(panel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                   BuildGothicVersionChoices());
+  int versionSelection = 2;
+  GothicVersionToIndex(initialVersion, versionSelection);
+  version_choice->SetSelection(versionSelection);
+  AddDialogSettingRow(mainSizer, panel, _("Gothic version:"), version_choice);
+
+  wxArrayString languageChoices;
+  BuildLanguageChoices(initialLanguage, languageChoices, language_codes);
+  language_choice = new wxChoice(panel, wxID_ANY, wxDefaultPosition,
+                                 wxDefaultSize, languageChoices);
+
+  int languageSelection = 0;
+  for (size_t i = 0; i < language_codes.size(); ++i) {
+    if (language_codes[i].CmpNoCase(initialLanguage) == 0) {
+      languageSelection = static_cast<int>(i);
+      break;
+    }
+  }
+  language_choice->SetSelection(languageSelection);
+  AddDialogSettingRow(mainSizer, panel, _("Language:"), language_choice);
+
+  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto *cancelButton = new wxButton(panel, wxID_CANCEL);
+  auto *applyButton = new wxButton(panel, wxID_OK);
+  buttonSizer->AddStretchSpacer();
+  buttonSizer->Add(cancelButton);
+  buttonSizer->AddSpacer(5);
+  buttonSizer->Add(applyButton);
+  buttonSizer->AddSpacer(5);
+
+  mainSizer->AddStretchSpacer();
+  mainSizer->Add(buttonSizer, 0, wxALL | wxEXPAND, 5);
+  panel->SetSizerAndFit(mainSizer);
+
+  auto *dialogSizer = new wxBoxSizer(wxVERTICAL);
+  dialogSizer->Add(panel, 1, wxEXPAND);
+  SetSizerAndFit(dialogSizer);
+}
+
+GothicVersion SettingsDialog::GetSelectedVersion() const {
+  GothicVersion selectedVersion = GothicVersion::Unknown;
+  if (!GothicVersionFromIndex(version_choice->GetSelection(), selectedVersion)) {
+    return GothicVersion::Unknown;
+  }
+  return selectedVersion;
+}
+
+wxString SettingsDialog::GetLanguageOverride() const {
+  const int selection = language_choice->GetSelection();
+  if (selection < 0 ||
+      selection >= static_cast<int>(language_codes.size())) {
+    return wxEmptyString;
+  }
+  return language_codes[static_cast<size_t>(selection)];
+}
+
 MainPanel::MainPanel(wxWindow *parent) : wxPanel(parent) {
   InitWidgets();
   Populate();
@@ -302,9 +484,12 @@ void MainPanel::InitWidgets() {
 
   button_start = new wxButton(this, wxID_ANY, _("Start Game"));
   button_start->Enable(false);
+  button_settings = new wxButton(this, wxID_ANY, _("Settings"));
 
   side_sizer->AddSpacer(5);
   side_sizer->Add(button_start, 0, kSizerExpandAll);
+  side_sizer->AddSpacer(3);
+  side_sizer->Add(button_settings, 0, kSizerExpandAll);
 
   check_orig = new wxCheckBox(this, wxID_ANY, _("Start game without mods"));
   check_window = new wxCheckBox(this, wxID_ANY, _("Window mode"));
@@ -352,6 +537,8 @@ void MainPanel::InitWidgets() {
   list_ctrl->Bind(wxEVT_LIST_ITEM_ACTIVATED,
                   [this](wxListEvent &) { DoStart(); });
   button_start->Bind(wxEVT_BUTTON, [this](wxCommandEvent &) { DoStart(); });
+  button_settings->Bind(wxEVT_BUTTON,
+                        [this](wxCommandEvent &) { DoSettings(); });
   check_orig->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent &) { DoOrigin(); });
 
   auto bindParamToggle = [this](wxCheckBox *box) {
@@ -653,6 +840,62 @@ void MainPanel::DoStart() {
   }
 }
 
+void MainPanel::DoSettings() {
+  const RuntimePaths *paths = nullptr;
+  wxString pathError;
+  if (!GetResolvedRuntimePaths(paths, pathError)) {
+    wxMessageBox(pathError, _("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
+  }
+
+  OpenGothicStarterApp *app = RequireInvariant(
+      dynamic_cast<OpenGothicStarterApp *>(wxTheApp),
+      wxT("wxTheApp must be an OpenGothicStarterApp instance."));
+
+  wxString currentLanguage;
+  if (!TryReadStoredLanguageOverride(*paths, currentLanguage)) {
+    currentLanguage.clear();
+  }
+
+  SettingsDialog dialog(this, app->gothic_version, currentLanguage);
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+
+  const GothicVersion selectedVersion = dialog.GetSelectedVersion();
+  if (selectedVersion == GothicVersion::Unknown) {
+    wxMessageBox(_("Selected Gothic version is invalid."), _("Configuration Error"),
+                 wxOK | wxICON_ERROR);
+    return;
+  }
+
+  const wxString selectedLanguage = dialog.GetLanguageOverride();
+
+  if (!WriteStoredGothicVersion(*paths, selectedVersion)) {
+    wxMessageBox(
+        wxString::Format(_("Failed to save Gothic version to:\n%s"),
+                         GetInstallConfigPath(*paths)),
+        _("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
+  }
+  if (!WriteStoredLanguageOverride(*paths, selectedLanguage)) {
+    wxMessageBox(
+        wxString::Format(_("Failed to save language setting to:\n%s"),
+                         GetInstallConfigPath(*paths)),
+        _("Configuration Error"), wxOK | wxICON_ERROR);
+    return;
+  }
+
+  app->gothic_version = selectedVersion;
+  if (selectedLanguage == currentLanguage) {
+    wxMessageBox(_("Settings saved."), _("Settings"),
+                 wxOK | wxICON_INFORMATION);
+  } else {
+    wxMessageBox(_("Settings saved. Restart the launcher to apply language changes."),
+                 _("Settings"), wxOK | wxICON_INFORMATION);
+  }
+}
+
 std::vector<GameEntry> MainPanel::InitGames() {
   std::vector<GameEntry> gamesList;
 
@@ -852,11 +1095,8 @@ bool OpenGothicStarterApp::InitGothicVersion() {
 
   wxSingleChoiceDialog dialog(
       nullptr,
-      wxString::Format(
-          _("Gothic version could not be detected automatically.\n"
-            "Please choose the version for this installation.\n\n"
-            "The selection will be saved in:\n%s"),
-          configPath),
+      _("Gothic version could not be detected automatically.\n"
+        "Please choose the version for this installation."),
       _("Select Gothic Version"), choices);
   dialog.SetSelection(2);
   if (dialog.ShowModal() != wxID_OK) {
