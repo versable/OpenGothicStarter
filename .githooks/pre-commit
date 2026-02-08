@@ -28,5 +28,13 @@ if [ "${#po_files[@]}" -gt 0 ]; then
 fi
 
 if [ "${#i18n_sync_trigger_files[@]}" -gt 0 ]; then
+  ./scripts/update_pot.sh
+  ./scripts/update_po.sh
+
+  git add i18n/opengothicstarter.pot
+  git add i18n/*/LC_MESSAGES/opengothicstarter.po
+
   ./scripts/check_pot_sync.sh
+  ./scripts/check_i18n.sh
+  echo "Updated and staged POT/PO catalogs."
 fi
