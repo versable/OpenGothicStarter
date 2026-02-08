@@ -99,6 +99,8 @@ jobs:
   windows:
     needs: [setup, format, tidy]
     runs-on: windows-2025
+    env:
+      VCPKG_REF: 2025.12.12
     steps:
     - uses: actions/checkout@v4
 
@@ -108,20 +110,20 @@ jobs:
         path: |
           C:\vcpkg\archives
           C:\vcpkg\downloads
-          C:\vcpkg\installed
-          C:\vcpkg\packages
-        key: ${{ runner.os }}-vcpkg-full-x64-windows-${{ hashFiles('**/vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-${{ env.VCPKG_REF }}-x64-windows-${{ hashFiles('**/vcpkg.json', '**/vcpkg-configuration.json') }}
         restore-keys: |
-          ${{ runner.os }}-vcpkg-full-x64-windows-
+          ${{ runner.os }}-vcpkg-${{ env.VCPKG_REF }}-x64-windows-
           ${{ runner.os }}-vcpkg-
 
     - name: Setup vcpkg
       shell: pwsh
       run: |
-        if (-not (Test-Path 'C:\vcpkg\vcpkg.exe')) {
+        if (-not (Test-Path 'C:\vcpkg\.git')) {
           git clone https://github.com/microsoft/vcpkg C:\vcpkg
-          & 'C:\vcpkg\bootstrap-vcpkg.bat'
         }
+        git -C C:\vcpkg fetch --depth 1 origin "refs/tags/$env:VCPKG_REF"
+        git -C C:\vcpkg checkout --force FETCH_HEAD
+        & 'C:\vcpkg\bootstrap-vcpkg.bat'
         New-Item -ItemType Directory -Force -Path 'C:\vcpkg\archives' | Out-Null
         New-Item -ItemType Directory -Force -Path 'C:\vcpkg\downloads' | Out-Null
         "VCPKG_ROOT=C:\vcpkg" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
