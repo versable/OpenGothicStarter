@@ -9,6 +9,11 @@ option(OGS_WARNINGS_AS_ERRORS "Treat warnings as errors." OFF)
 option(OGS_EXTRA_WARNINGS "Enable additional warning checks." OFF)
 option(OGS_HARDENED_BUILD "Enable compiler/linker hardening flags." OFF)
 
+set(OGS_I18N_DOMAIN "opengothicstarter")
+set(OGS_I18N_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/i18n")
+set(OGS_I18N_LOCALE_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/locale")
+set(OGS_I18N_INSTALL_DIR "share/locale")
+
 # Find wxWidgets
 find_package(wxWidgets REQUIRED COMPONENTS core base)
 if(wxWidgets_FOUND)
@@ -162,6 +167,60 @@ elseif(PEPARSE_INCLUDE_DIR AND PEPARSE_LIBRARY)
     target_include_directories(${PROJECT_NAME} PRIVATE ${PEPARSE_INCLUDE_DIR})
     target_link_libraries(${PROJECT_NAME} ${PEPARSE_LIBRARY})
     target_compile_definitions(${PROJECT_NAME} PRIVATE OGS_HAVE_PE_PARSE=1)
+endif()
+
+# Optional gettext catalogs (.po -> .mo)
+find_program(MSGFMT_EXECUTABLE msgfmt)
+file(GLOB OGS_I18N_PO_FILES RELATIVE "${OGS_I18N_SOURCE_DIR}"
+    "${OGS_I18N_SOURCE_DIR}/*/LC_MESSAGES/${OGS_I18N_DOMAIN}.po"
+)
+
+set(OGS_I18N_MO_FILES "")
+set(OGS_I18N_LOCALES "")
+
+if(OGS_I18N_PO_FILES)
+    if(MSGFMT_EXECUTABLE)
+        foreach(PO_REL_PATH IN LISTS OGS_I18N_PO_FILES)
+            string(REGEX REPLACE "/LC_MESSAGES/.*$" "" LOCALE_NAME "${PO_REL_PATH}")
+
+            set(PO_FILE "${OGS_I18N_SOURCE_DIR}/${PO_REL_PATH}")
+            set(MO_FILE "${OGS_I18N_LOCALE_OUTPUT_DIR}/${LOCALE_NAME}/LC_MESSAGES/${OGS_I18N_DOMAIN}.mo")
+
+            add_custom_command(
+                OUTPUT "${MO_FILE}"
+                COMMAND ${CMAKE_COMMAND} -E make_directory "${OGS_I18N_LOCALE_OUTPUT_DIR}/${LOCALE_NAME}/LC_MESSAGES"
+                COMMAND "${MSGFMT_EXECUTABLE}" -o "${MO_FILE}" "${PO_FILE}"
+                DEPENDS "${PO_FILE}"
+                VERBATIM
+            )
+
+            list(APPEND OGS_I18N_MO_FILES "${MO_FILE}")
+            list(APPEND OGS_I18N_LOCALES "${LOCALE_NAME}")
+        endforeach()
+
+        add_custom_target(ogs_i18n_catalogs DEPENDS ${OGS_I18N_MO_FILES})
+        add_dependencies(${PROJECT_NAME} ogs_i18n_catalogs)
+
+        list(REMOVE_DUPLICATES OGS_I18N_LOCALES)
+        foreach(LOCALE_NAME IN LISTS OGS_I18N_LOCALES)
+            set(MO_FILE "${OGS_I18N_LOCALE_OUTPUT_DIR}/${LOCALE_NAME}/LC_MESSAGES/${OGS_I18N_DOMAIN}.mo")
+
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E make_directory
+                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/locale/${LOCALE_NAME}/LC_MESSAGES"
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${MO_FILE}"
+                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/locale/${LOCALE_NAME}/LC_MESSAGES/${OGS_I18N_DOMAIN}.mo"
+                VERBATIM
+            )
+
+            install(FILES "${MO_FILE}" OPTIONAL
+                DESTINATION "${OGS_I18N_INSTALL_DIR}/${LOCALE_NAME}/LC_MESSAGES"
+            )
+        endforeach()
+    else()
+        message(WARNING "Found i18n .po files but 'msgfmt' is not available. Catalog compilation is disabled.")
+    endif()
 endif()
 
 # Install rules
