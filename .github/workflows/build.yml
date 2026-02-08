@@ -57,6 +57,9 @@ jobs:
     - name: Validate localization catalogs
       run: ./scripts/check_i18n.sh
 
+    - name: Validate POT template sync
+      run: ./scripts/check_pot_sync.sh
+
   tidy:
     needs: [format, i18n]
     runs-on: ubuntu-24.04
