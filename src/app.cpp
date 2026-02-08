@@ -3,6 +3,7 @@
 #include "pe_icon_loader.h"
 #include "settings_dialog.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <string>
@@ -78,6 +79,10 @@ static bool GetResolvedRuntimePaths(const RuntimePaths *&paths, wxString &error)
 
 static wxString GetInstallConfigPath(const RuntimePaths &paths) {
   return wxFileName(paths.system_dir, wxT("OpenGothicStarter.ini")).GetFullPath();
+}
+
+static wxString GetSystemPackConfigPath(const RuntimePaths &paths) {
+  return wxFileName(paths.system_dir, wxT("SystemPack.ini")).GetFullPath();
 }
 
 static bool DirectoryHasFileCaseInsensitive(const wxString &dirPath,
@@ -593,7 +598,82 @@ void MainPanel::DoSettings() {
     currentLanguage.clear();
   }
 
-  SettingsDialog dialog(this, app->gothic_version, currentLanguage);
+  SystemPackSettings systemPackSettings;
+  {
+    const wxString systemPackPath = GetSystemPackConfigPath(*paths);
+    if (wxFileName::FileExists(systemPackPath)) {
+      wxFileConfig cfg(wxEmptyString, wxEmptyString, systemPackPath, wxEmptyString,
+                       wxCONFIG_USE_LOCAL_FILE);
+      long value = 0;
+      if (cfg.Read(wxT("DEBUG/Show_FPS_Counter"), &value)) {
+        systemPackSettings.show_fps_counter = value != 0;
+      }
+      if (cfg.Read(wxT("PARAMETERS/HideFocus"), &value)) {
+        systemPackSettings.hide_focus = value != 0;
+      }
+
+      double doubleValue = 0.0;
+      if (cfg.Read(wxT("PARAMETERS/VerticalFOV"), &doubleValue)) {
+        systemPackSettings.vertical_fov = doubleValue;
+        if (systemPackSettings.vertical_fov < 1.0) {
+          systemPackSettings.vertical_fov = 67.5;
+        }
+      }
+      if (cfg.Read(wxT("INTERFACE/Scale"), &doubleValue)) {
+        systemPackSettings.interface_scale = doubleValue;
+        if (systemPackSettings.interface_scale <= 0.0) {
+          systemPackSettings.interface_scale = 1.0;
+        }
+      }
+
+      if (cfg.Read(wxT("PARAMETERS/FPS_Limit"), &value)) {
+        systemPackSettings.fps_limit = static_cast<int>(value);
+        if (systemPackSettings.fps_limit < 0) {
+          systemPackSettings.fps_limit = 0;
+        }
+      }
+
+      if (cfg.Read(wxT("INTERFACE/InventoryCellSize"), &value)) {
+        systemPackSettings.inventory_cell_size = static_cast<int>(value);
+        if (systemPackSettings.inventory_cell_size < 10) {
+          systemPackSettings.inventory_cell_size = 10;
+        }
+      }
+
+      if (cfg.Read(wxT("INTERFACE/NewChapterSizeX"), &value)) {
+        systemPackSettings.new_chapter_size_x =
+            static_cast<int>(std::max(1L, value));
+      }
+      if (cfg.Read(wxT("INTERFACE/NewChapterSizeY"), &value)) {
+        systemPackSettings.new_chapter_size_y =
+            static_cast<int>(std::max(1L, value));
+      }
+
+      if (cfg.Read(wxT("INTERFACE/SaveGameImageSizeX"), &value)) {
+        systemPackSettings.save_game_image_size_x =
+            static_cast<int>(std::max(0L, value));
+      }
+      if (cfg.Read(wxT("INTERFACE/SaveGameImageSizeY"), &value)) {
+        systemPackSettings.save_game_image_size_y =
+            static_cast<int>(std::max(0L, value));
+      }
+
+      if (cfg.Read(wxT("INTERFACE/HideHealthBar"), &value)) {
+        systemPackSettings.show_health_bar = value == 0;
+      }
+      if (cfg.Read(wxT("INTERFACE/ShowManaBar"), &value)) {
+        systemPackSettings.show_mana_bar =
+            std::clamp(static_cast<int>(value), 0, 2);
+      }
+      if (cfg.Read(wxT("INTERFACE/ShowSwimBar"), &value)) {
+        systemPackSettings.show_swim_bar =
+            std::clamp(static_cast<int>(value), 0, 2);
+      }
+    }
+  }
+
+  SettingsDialog dialog(this, app->gothic_version, currentLanguage,
+                        systemPackSettings);
   if (dialog.ShowModal() != wxID_SAVE) {
     return;
   }
@@ -606,6 +686,7 @@ void MainPanel::DoSettings() {
   }
 
   const wxString selectedLanguage = dialog.GetLanguageOverride();
+  const SystemPackSettings selectedSystemPack = dialog.GetSystemPackSettings();
 
   if (!WriteStoredGothicVersion(*paths, selectedVersion)) {
     wxMessageBox(
@@ -634,6 +715,51 @@ void MainPanel::DoSettings() {
                          configPath),
         _("Configuration Error"), wxOK | wxICON_ERROR);
     return;
+  }
+
+  {
+    const wxString systemPackPath = GetSystemPackConfigPath(*paths);
+    wxFileConfig systemPackCfg(wxEmptyString, wxEmptyString, systemPackPath,
+                               wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+    systemPackCfg.Write(wxT("DEBUG/Show_FPS_Counter"),
+                        selectedSystemPack.show_fps_counter ? 1L : 0L);
+    systemPackCfg.Write(wxT("PARAMETERS/HideFocus"),
+                        selectedSystemPack.hide_focus ? 1L : 0L);
+    systemPackCfg.Write(wxT("PARAMETERS/VerticalFOV"),
+                        selectedSystemPack.vertical_fov);
+    systemPackCfg.Write(
+        wxT("PARAMETERS/FPS_Limit"),
+        static_cast<long>(std::max(0, selectedSystemPack.fps_limit)));
+    systemPackCfg.Write(wxT("INTERFACE/Scale"),
+                        std::max(0.1, selectedSystemPack.interface_scale));
+    systemPackCfg.Write(
+        wxT("INTERFACE/InventoryCellSize"),
+        static_cast<long>(std::max(10, selectedSystemPack.inventory_cell_size)));
+    systemPackCfg.Write(
+        wxT("INTERFACE/NewChapterSizeX"),
+        static_cast<long>(std::max(1, selectedSystemPack.new_chapter_size_x)));
+    systemPackCfg.Write(
+        wxT("INTERFACE/NewChapterSizeY"),
+        static_cast<long>(std::max(1, selectedSystemPack.new_chapter_size_y)));
+    systemPackCfg.Write(
+        wxT("INTERFACE/SaveGameImageSizeX"),
+        static_cast<long>(std::max(0, selectedSystemPack.save_game_image_size_x)));
+    systemPackCfg.Write(
+        wxT("INTERFACE/SaveGameImageSizeY"),
+        static_cast<long>(std::max(0, selectedSystemPack.save_game_image_size_y)));
+    systemPackCfg.Write(wxT("INTERFACE/HideHealthBar"),
+                        selectedSystemPack.show_health_bar ? 0L : 1L);
+    systemPackCfg.Write(wxT("INTERFACE/ShowManaBar"),
+                        static_cast<long>(std::clamp(selectedSystemPack.show_mana_bar, 0, 2)));
+    systemPackCfg.Write(wxT("INTERFACE/ShowSwimBar"),
+                        static_cast<long>(std::clamp(selectedSystemPack.show_swim_bar, 0, 2)));
+    if (!systemPackCfg.Flush()) {
+      wxMessageBox(
+          wxString::Format(_("Failed to save SystemPack settings to:\n%s"),
+                           systemPackPath),
+          _("Configuration Error"), wxOK | wxICON_ERROR);
+      return;
+    }
   }
 
   app->gothic_version = selectedVersion;
