@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on Common Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.2.1] - 2026-02-08
+
+- Fixed `clang-tidy` CI failure in the settings dialog by using explicit sizer
+  flag casts for mixed wx flag enums.
+- Stopped shipping redundant `locale/` folders in release artifacts now that
+  catalogs are embedded in the launcher binary.
+- Updated `README.md` to remove outdated manual language override guidance and
+  clarify developer build vs local runtime test requirements.
+
 ## [0.2.0] - 2026-02-08
 
 - Added full launcher localization infrastructure with gettext catalogs,
@@ -48,6 +57,7 @@ and this project adheres to Semantic Versioning.
 
 _First release._
 
+[0.2.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.1
 [0.2.0]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.0
 [0.1.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.1.1
 [0.1.0]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.1.0
