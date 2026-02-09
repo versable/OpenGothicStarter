@@ -66,7 +66,8 @@ msgstr ""
 msgid ""
 "Failed to save SystemPack settings to:\n"
 "%s"
-msgstr "Die SystemPack-Einstellungen konnten nicht gespeichert werden unter:\n"
+msgstr ""
+"Die SystemPack-Einstellungen konnten nicht gespeichert werden unter:\n"
 "%s"
 
 #, c-format
@@ -79,9 +80,6 @@ msgstr ""
 
 msgid "Failed to start OpenGothic process."
 msgstr "OpenGothic-Prozess konnte nicht gestartet werden."
-
-msgid "Force DirectX 12"
-msgstr "DirectX 12 erzwingen"
 
 msgid "General"
 msgstr "Allgemein"
@@ -239,6 +237,9 @@ msgstr "Fenstermodus"
 
 msgid "none"
 msgstr "keine"
+
+#~ msgid "Force DirectX 12"
+#~ msgstr "DirectX 12 erzwingen"
 
 #~ msgid "Settings saved."
 #~ msgstr "Einstellungen gespeichert."

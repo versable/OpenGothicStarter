@@ -62,9 +62,6 @@ msgstr ""
 msgid "Failed to start OpenGothic process."
 msgstr ""
 
-msgid "Force DirectX 12"
-msgstr ""
-
 msgid "General"
 msgstr ""
 

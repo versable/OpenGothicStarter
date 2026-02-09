@@ -59,9 +59,6 @@ private:
   wxCheckBox *check_meshlets;
   wxCheckBox *check_vsm;
   wxCheckBox *check_bench;
-#if defined(_WIN32)
-  wxCheckBox *check_dx12;
-#endif
   wxStaticText *field_fxaa;
   wxStaticText *value_fxaa;
   wxSlider *slide_fxaa;

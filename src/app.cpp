@@ -188,9 +188,6 @@ void MainPanel::InitWidgets() {
   check_orig = new wxCheckBox(this, wxID_ANY, _("Start game without mods"));
   check_window = new wxCheckBox(this, wxID_ANY, _("Window mode"));
   check_marvin = new wxCheckBox(this, wxID_ANY, _("Marvin mode"));
-#if defined(_WIN32)
-  check_dx12 = new wxCheckBox(this, wxID_ANY, _("Force DirectX 12"));
-#endif
   check_rt = new wxCheckBox(this, wxID_ANY, _("Ray tracing"));
   check_rti = new wxCheckBox(this, wxID_ANY, _("Global illumination"));
   check_meshlets = new wxCheckBox(this, wxID_ANY, _("Meshlets"));
@@ -210,9 +207,6 @@ void MainPanel::InitWidgets() {
   side_sizer->Add(check_orig, 0, kSizerExpandAll);
   side_sizer->Add(check_window, 0, kSizerExpandAll);
   side_sizer->Add(check_marvin, 0, kSizerExpandAll);
-#if defined(_WIN32)
-  side_sizer->Add(check_dx12, 0, kSizerExpandAll);
-#endif
   side_sizer->Add(check_rt, 0, kSizerExpandAll);
   side_sizer->Add(check_rti, 0, kSizerExpandAll);
   side_sizer->Add(check_meshlets, 0, kSizerExpandAll);
@@ -246,9 +240,6 @@ void MainPanel::InitWidgets() {
   bindParamToggle(check_meshlets);
   bindParamToggle(check_vsm);
   bindParamToggle(check_bench);
-#if defined(_WIN32)
-  bindParamToggle(check_dx12);
-#endif
   slide_fxaa->Bind(wxEVT_SLIDER, &MainPanel::OnFXAAScroll, this);
 }
 
@@ -330,12 +321,6 @@ void MainPanel::LoadParams() {
   config->Read(wxT("PARAMS/bench"), &bench, false);
   check_bench->SetValue(bench);
 
-#if defined(_WIN32)
-  bool dx12;
-  config->Read(wxT("PARAMS/dx12"), &dx12, false);
-  check_dx12->SetValue(dx12);
-#endif
-
   int fxaa;
   config->Read(wxT("PARAMS/FXAA"), &fxaa, 0L);
   slide_fxaa->SetValue(fxaa);
@@ -357,9 +342,6 @@ void MainPanel::SaveParams() {
   config->Write(wxT("PARAMS/meshlets"), check_meshlets->GetValue());
   config->Write(wxT("PARAMS/vsm"), check_vsm->GetValue());
   config->Write(wxT("PARAMS/bench"), check_bench->GetValue());
-#if defined(_WIN32)
-  config->Write(wxT("PARAMS/dx12"), check_dx12->GetValue());
-#endif
   config->Write(wxT("PARAMS/FXAA"), static_cast<int>(slide_fxaa->GetValue()));
   config->Flush();
 }
@@ -449,12 +431,6 @@ bool MainPanel::BuildLaunchCommand(const RuntimePaths &paths, int gameidx,
   if (check_bench->GetValue()) {
     command.Add(wxT("-benchmark"));
   }
-
-#if defined(_WIN32)
-  if (check_dx12->GetValue()) {
-    command.Add(wxT("-dx12"));
-  }
-#endif
 
   int fxaa = slide_fxaa->GetValue();
   if (fxaa > 0) {
