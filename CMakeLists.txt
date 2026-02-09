@@ -64,10 +64,6 @@ endif()
 
 # Windows-specific settings
 if(WIN32)
-    # Ensure GUI subsystem is used
-    set_target_properties(${PROJECT_NAME} PROPERTIES
-        WIN32_EXECUTABLE TRUE
-    )
     # Add wxWidgets definitions for Windows
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         wxUSE_GUI=1
