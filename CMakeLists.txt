@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 project(OpenGothicStarter VERSION 0.3.1 LANGUAGES CXX)
 include(GNUInstallDirs)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 option(OGS_STRICT_WARNINGS "Enable strict compiler warnings." ON)
 option(OGS_WARNINGS_AS_ERRORS "Treat warnings as errors." OFF)
 option(OGS_EXTRA_WARNINGS "Enable additional warning checks." OFF)
@@ -61,6 +58,7 @@ if(WIN32)
 else()
     add_executable(${PROJECT_NAME} ${SOURCES})
 endif()
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 # Windows-specific settings
 if(WIN32)
