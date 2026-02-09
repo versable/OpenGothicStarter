@@ -69,7 +69,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libwxgtk3.2-dev clang clang-tidy
+        sudo apt-get install -y libwxgtk3.2-dev clang clang-tidy gettext
 
     - name: Configure
       env:
@@ -95,7 +95,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libwxgtk3.2-dev clang lld
+        sudo apt-get install -y libwxgtk3.2-dev clang lld gettext
 
     - name: Configure
       env:
@@ -161,10 +161,17 @@ jobs:
       run: |
         & "$env:VCPKG_ROOT\vcpkg.exe" install --triplet x64-windows
 
+    - name: Install gettext tools
+      shell: pwsh
+      run: |
+        choco install -y gettext
+        $msgfmt = (Get-Command msgfmt.exe -ErrorAction Stop).Source
+        "MSGFMT_EXECUTABLE=$msgfmt" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
     - name: Configure
       shell: pwsh
       run: |
-        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON
+        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON -DMSGFMT_EXECUTABLE="$env:MSGFMT_EXECUTABLE"
 
     - name: Build
       shell: pwsh
@@ -191,10 +198,10 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install dependencies
-      run: brew install wxwidgets
+      run: brew install wxwidgets gettext
 
     - name: Configure
-      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON -DOGS_HARDENED_BUILD=ON
+      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON -DOGS_HARDENED_BUILD=ON -DMSGFMT_EXECUTABLE="$(brew --prefix gettext)/bin/msgfmt"
 
     - name: Build
       run: cmake --build build --parallel
@@ -212,10 +219,10 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install dependencies
-      run: brew install wxwidgets
+      run: brew install wxwidgets gettext
 
     - name: Configure
-      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON -DOGS_HARDENED_BUILD=ON
+      run: cmake -S . -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -DOGS_WARNINGS_AS_ERRORS=ON -DOGS_EXTRA_WARNINGS=ON -DOGS_HARDENED_BUILD=ON -DMSGFMT_EXECUTABLE="$(brew --prefix gettext)/bin/msgfmt"
 
     - name: Build
       run: cmake --build build --parallel

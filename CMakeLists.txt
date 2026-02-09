@@ -240,7 +240,9 @@ if(OGS_I18N_PO_FILES)
             )
         endforeach()
     else()
-        message(WARNING "Found i18n .po files but 'msgfmt' is not available. Catalog compilation is disabled.")
+        message(FATAL_ERROR
+            "Found i18n .po files but 'msgfmt' is not available. "
+            "Install gettext tools or pass -DMSGFMT_EXECUTABLE=/path/to/msgfmt.")
     endif()
 endif()
 
