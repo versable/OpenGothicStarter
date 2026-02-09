@@ -161,17 +161,17 @@ if(NOT WIN32)
 endif()
 
 # Link libraries
-target_link_libraries(${PROJECT_NAME} ${wxWidgets_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${wxWidgets_LIBRARIES})
 
 # Include directories
 target_include_directories(${PROJECT_NAME} PRIVATE ${wxWidgets_INCLUDE_DIRS})
 
 if(OGS_BUNDLED_PEPARSE)
-    target_link_libraries(${PROJECT_NAME} pe-parse::pe-parse)
+    target_link_libraries(${PROJECT_NAME} PRIVATE pe-parse::pe-parse)
     target_compile_definitions(${PROJECT_NAME} PRIVATE OGS_HAVE_PE_PARSE=1)
 elseif(PEPARSE_INCLUDE_DIR AND PEPARSE_LIBRARY)
     target_include_directories(${PROJECT_NAME} PRIVATE ${PEPARSE_INCLUDE_DIR})
-    target_link_libraries(${PROJECT_NAME} ${PEPARSE_LIBRARY})
+    target_link_libraries(${PROJECT_NAME} PRIVATE ${PEPARSE_LIBRARY})
     target_compile_definitions(${PROJECT_NAME} PRIVATE OGS_HAVE_PE_PARSE=1)
 endif()
 
