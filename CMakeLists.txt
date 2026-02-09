@@ -12,7 +12,6 @@ option(OGS_HARDENED_BUILD "Enable compiler/linker hardening flags." OFF)
 set(OGS_I18N_DOMAIN "opengothicstarter")
 set(OGS_I18N_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/i18n")
 set(OGS_I18N_LOCALE_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/locale")
-set(OGS_I18N_INSTALL_DIR "share/locale")
 
 # Find wxWidgets
 find_package(wxWidgets REQUIRED COMPONENTS core base)
@@ -226,22 +225,6 @@ if(OGS_I18N_PO_FILES)
             list(APPEND OGS_EMBEDDED_LOCALE_DEPENDS "${OGS_EMBEDDED_LOCALE_ZIP}")
         endif()
 
-        foreach(LOCALE_NAME IN LISTS OGS_I18N_LOCALES)
-            set(MO_FILE "${OGS_I18N_LOCALE_OUTPUT_DIR}/${LOCALE_NAME}/LC_MESSAGES/${OGS_I18N_DOMAIN}.mo")
-
-            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E make_directory
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/locale/${LOCALE_NAME}/LC_MESSAGES"
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                    "${MO_FILE}"
-                    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/locale/${LOCALE_NAME}/LC_MESSAGES/${OGS_I18N_DOMAIN}.mo"
-                VERBATIM
-            )
-
-            install(FILES "${MO_FILE}" OPTIONAL
-                DESTINATION "${OGS_I18N_INSTALL_DIR}/${LOCALE_NAME}/LC_MESSAGES"
-            )
-        endforeach()
     else()
         message(FATAL_ERROR
             "Found i18n .po files but 'msgfmt' is not available. "
