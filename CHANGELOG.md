@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on Common Changelog,
 and this project adheres to Semantic Versioning.
 
+## [0.3.1] - 2026-02-09
+
+- Removed the experimental Windows-only `-dx12` launcher toggle from settings
+  and command construction.
+- Added a canonical `scripts/verify.sh` gate and routed pre-commit validation
+  through it.
+- Simplified README install instructions to extract both release ZIP archives
+  directly into `Gothic/system`.
+
 ## [0.3.0] - 2026-02-08
 
 - Added install-level `SystemPack.ini` settings support in a dedicated
@@ -75,6 +84,7 @@ and this project adheres to Semantic Versioning.
 
 _First release._
 
+[0.3.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.3.1
 [0.3.0]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.3.0
 [0.2.2]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.2
 [0.2.1]: https://github.com/versable/OpenGothicStarter/releases/tag/v0.2.1
