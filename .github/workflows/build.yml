@@ -164,7 +164,7 @@ jobs:
     - name: Install gettext tools
       shell: pwsh
       run: |
-        choco install -y gettext
+        choco install -y gettext --version=0.26.0
         $msgfmt = @(
           'C:\Program Files\gettext-iconv\bin\msgfmt.exe',
           'C:\Program Files (x86)\gettext-iconv\bin\msgfmt.exe'
