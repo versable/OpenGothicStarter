@@ -149,12 +149,15 @@ if(OGS_HARDENED_BUILD AND NOT MSVC)
     endif()
 endif()
 
-# ASan (Note: fixed typo in comment)
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    if(NOT WIN32)  # ASan typically not used with MSVC
-        target_compile_options(${PROJECT_NAME} PRIVATE -fsanitize=address -fno-omit-frame-pointer)
-        target_link_options(${PROJECT_NAME} PRIVATE -fsanitize=address)
-    endif()
+# ASan for Debug configuration on non-Windows platforms.
+if(NOT WIN32)
+    target_compile_options(${PROJECT_NAME} PRIVATE
+        $<$<CONFIG:Debug>:-fsanitize=address>
+        $<$<CONFIG:Debug>:-fno-omit-frame-pointer>
+    )
+    target_link_options(${PROJECT_NAME} PRIVATE
+        $<$<CONFIG:Debug>:-fsanitize=address>
+    )
 endif()
 
 # Link libraries
